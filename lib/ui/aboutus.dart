@@ -6,44 +6,115 @@ class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("About us")),
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: const Text(
+          "About Us",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.black,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "About Recipe recorder app",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              "Recipe Recorder App is designed to help users save and manage their favorite recipes efficiently. "
-              "With an integrated database, users can store their recipes in a structured format, ensuring they never lose important details. "
-              "The app also provides cooking tips and suggestions to enhance the user’s culinary skills.",
-              style: TextStyle(fontSize: 16),
+            Card(
+              color: Colors.grey[900],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "About Recipe Recorder App",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      "Recipe Recorder App helps users efficiently save and manage their favorite recipes. "
+                      "With an integrated database, users can securely store and access recipes anytime. "
+                      "The app also provides cooking tips and suggestions to enhance your culinary skills.",
+                      style: TextStyle(fontSize: 16, color: Colors.white70),
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              "Developers",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            const Text("Developed by:", style: TextStyle(fontSize: 16)),
-            const SizedBox(height: 5),
-            const Text(
-              "Tanatkanov Kadyrulan\nAsanali Ashimov\nZholaman Yerzhan",
-              style: TextStyle(fontSize: 16),
+            Card(
+              color: Colors.grey[900],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Developers",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      "Developed by:",
+                      style: TextStyle(fontSize: 16, color: Colors.white70),
+                    ),
+                    const SizedBox(height: 5),
+                    const Text(
+                      "Tanatkanov Kadyrulan\nAsanali Ashimov\nZholaman Yerzhan",
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              "Course: Crossplatform Development, Astana IT University",
-              style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
-            ),
-            const SizedBox(height: 5),
-            const Text(
-              "Mentor: Assistant Professor Abzal Kyzyrkanov",
-              style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+            Card(
+              color: Colors.grey[900],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Course Details",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      "Course: Crossplatform Development, Astana IT University",
+                      style: TextStyle(fontSize: 16, color: Colors.white70, fontStyle: FontStyle.italic),
+                    ),
+                    const SizedBox(height: 5),
+                    const Text(
+                      "Mentor: Assistant Professor Abzal Kyzyrkanov",
+                      style: TextStyle(fontSize: 16, color: Colors.white70, fontStyle: FontStyle.italic),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
