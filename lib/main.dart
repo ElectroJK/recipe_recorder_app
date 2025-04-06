@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'ui/aboutus.dart';
+import 'homePage/home_page.dart';
+import 'aboutUs/aboutus.dart';
+import 'design/theme.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,6 +12,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(debugShowCheckedModeBanner: false, home: AboutPage());
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Recipe Recorder',
+      theme: appTheme,
+      home: const HomePage(),
+    );
   }
 }
