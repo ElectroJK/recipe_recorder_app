@@ -1,3 +1,4 @@
+Kada b̴̧͖̜̰̪͉͈̅̆̍͊͊a̸͋͑̄̉́́̚̚ ̼̜̠̼͍̘͙̬͓̰͈̻̬̩̘̅n̵̛̺̺̙̽̑̀͌̉̀̂̾̃͝͝͝, [07.04.2025 21:13]
 import 'package:flutter/material.dart';
 import 'package:recipe_recorder_app/logics/logic.dart';
 import 'package:recipe_recorder_app/aboutUs/aboutus.dart';
@@ -100,3 +101,41 @@ class RecipeCard extends StatelessWidget {
                 ),
               ),
             ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Expanded(
+                      child: Text(
+                        description,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.white70,
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
