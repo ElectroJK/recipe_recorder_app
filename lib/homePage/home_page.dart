@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import '../aboutUs/aboutus.dart';
 import 'package:recipe_recorder_app/l10n/app_localizations_ext.dart';
 import 'package:recipe_recorder_app/logics/logic.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   final void Function(ThemeMode) onThemeChanged;
   final void Function(Locale) onLocaleChanged;
 
@@ -12,6 +13,21 @@ class HomePage extends StatelessWidget {
     required this.onThemeChanged,
     required this.onLocaleChanged,
   });
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
+  late List<Map<String, String>> localRecipes;
+  Set<Map<String, String>> favoriteRecipes = {}; // теперь по объекту
+
+  @override
+  void initState() {
+    super.initState();
+    localRecipes = List<Map<String, String>>.from(recipes);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,17 +59,98 @@ class HomePage extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 700),
           child: Padding(
             padding: const EdgeInsets.all(12),
-            child: ListView.builder(
-              itemCount: recipes.length,
-              itemBuilder: (context, index) {
-                final recipe = recipes[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _recipeCard(
-                    context,
-                    context.l10n.getRecipeTitle(index + 1),
-                    context.l10n.getRecipeDescription(index + 1),
-                    recipe['image']!,
+            child: AnimatedList(
+              key: _listKey,
+              initialItemCount: localRecipes.length,
+              itemBuilder: (context, index, animation) {
+                final recipe = localRecipes[index];
+                return SizeTransition(
+                  sizeFactor: animation,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Slidable(
+                      key: ValueKey(recipe['title'] ?? index),
+                      endActionPane: ActionPane(
+                        motion: const DrawerMotion(),
+                        children: [
+                          SlidableAction(
+                            onPressed: (_) {
+                              setState(() {
+                                if (favoriteRecipes.contains(recipe)) {
+                                  favoriteRecipes.remove(recipe);
+                                } else {
+                                  favoriteRecipes.add(recipe);
+                                }
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    favoriteRecipes.contains(recipe)
+                                        ? 'Added to favorites'
+                                        : 'Removed from favorites',
+                                  ),
+                                ),
+                              );
+                            },
+                            backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                            icon: Icons.star,
+                            label: 'Favorites',
+                          ),
+                          SlidableAction(
+                            onPressed: (_) async {
+                              final shouldDelete = await showDialog<bool>(
+                                context: context,
+                                builder:
+                                    (context) => AlertDialog(
+                                      title: const Text('Удалить рецепт?'),
+                                      content: const Text(
+                                        'Ты уверен, что хочешь удалить этот рецепт?',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed:
+                                              () =>
+                                                  Navigator.pop(context, false),
+                                          child: const Text('Отмена'),
+                                        ),
+                                        TextButton(
+                                          onPressed:
+                                              () =>
+                                                  Navigator.pop(context, true),
+                                          child: const Text('Удалить'),
+                                        ),
+                                      ],
+                                    ),
+                              );
+
+                              if (shouldDelete == true) {
+                                _removeRecipe(recipe);
+                              }
+                            },
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            icon: Icons.delete,
+                          ),
+                        ],
+                      ),
+                      child: Stack(
+                        children: [
+                          _recipeCard(
+                            context,
+                            context.l10n.getRecipeTitle(index + 1),
+                            context.l10n.getRecipeDescription(index + 1),
+                            recipe['image']!,
+                          ),
+                          if (favoriteRecipes.contains(recipe))
+                            const Positioned(
+                              top: 8,
+                              right: 8,
+                              child: Icon(Icons.star, color: Colors.orange),
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
                 );
               },
@@ -130,6 +227,37 @@ class HomePage extends StatelessWidget {
     );
   }
 
+  void _removeRecipe(Map<String, String> recipeToRemove) {
+    final index = localRecipes.indexOf(recipeToRemove);
+    if (index == -1) return;
+
+    final removedCard = Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: _recipeCard(
+        context,
+        context.l10n.getRecipeTitle(index + 1),
+        context.l10n.getRecipeDescription(index + 1),
+        recipeToRemove['image']!,
+      ),
+    );
+
+    _listKey.currentState?.removeItem(
+      index,
+      (context, animation) =>
+          SizeTransition(sizeFactor: animation, child: removedCard),
+      duration: const Duration(milliseconds: 300),
+    );
+
+    setState(() {
+      localRecipes.removeAt(index);
+      favoriteRecipes.remove(recipeToRemove);
+    });
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Recipe deleted')));
+  }
+
   void _showLanguageBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -175,7 +303,7 @@ class HomePage extends StatelessWidget {
               ? const Icon(Icons.check_circle, color: Colors.green)
               : null,
       onTap: () {
-        onLocaleChanged(locale);
+        widget.onLocaleChanged(locale);
         Navigator.pop(context);
       },
     );
@@ -195,7 +323,7 @@ class HomePage extends StatelessWidget {
               leading: const Icon(Icons.light_mode),
               title: const Text('Light Theme'),
               onTap: () {
-                onThemeChanged(ThemeMode.light);
+                widget.onThemeChanged(ThemeMode.light);
                 Navigator.pop(context);
               },
             ),
@@ -203,7 +331,7 @@ class HomePage extends StatelessWidget {
               leading: const Icon(Icons.dark_mode),
               title: const Text('Dark Theme'),
               onTap: () {
-                onThemeChanged(ThemeMode.dark);
+                widget.onThemeChanged(ThemeMode.dark);
                 Navigator.pop(context);
               },
             ),
