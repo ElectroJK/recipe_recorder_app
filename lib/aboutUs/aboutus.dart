@@ -1,48 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:recipe_recorder_app/design/theme.dart';
 
 class AboutPage extends StatelessWidget {
-  const AboutPage({super.key});
+  final ThemeMode currentTheme;
+
+  const AboutPage({super.key, required this.currentTheme});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        title: Text(
-          AppLocalizations.of(context)!.aboutUsTitle,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+    final isDarkMode = currentTheme == ThemeMode.dark;
+    final gradient = isDarkMode ? getDarkGradient() : getLightGradient();
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      decoration: BoxDecoration(gradient: gradient),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: Text(
+            AppLocalizations.of(context)!.aboutUsTitle,
+            style: TextStyle(
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: IconThemeData(color: Theme.of(context).iconTheme.color),
         ),
-        backgroundColor: Colors.black,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AboutCard(
-                title: AppLocalizations.of(context)!.aboutRecipeRecorderTitle,
-                content:
-                    AppLocalizations.of(context)!.aboutRecipeRecorderContent,
-              ),
-              const SizedBox(height: 20),
-              AboutCard(
-                title: AppLocalizations.of(context)!.developersTitle,
-                content: AppLocalizations.of(context)!.developersContent,
-              ),
-              const SizedBox(height: 20),
-              AboutCard(
-                title: AppLocalizations.of(context)!.courseDetailsTitle,
-                content: AppLocalizations.of(context)!.courseDetailsContent,
-                isItalic: true,
-              ),
-            ],
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AboutCard(
+                  title: AppLocalizations.of(context)!.aboutRecipeRecorderTitle,
+                  content: AppLocalizations.of(context)!.aboutRecipeRecorderContent,
+                ),
+                const SizedBox(height: 20),
+                AboutCard(
+                  title: AppLocalizations.of(context)!.developersTitle,
+                  content: AppLocalizations.of(context)!.developersContent,
+                ),
+                const SizedBox(height: 20),
+                AboutCard(
+                  title: AppLocalizations.of(context)!.courseDetailsTitle,
+                  content: AppLocalizations.of(context)!.courseDetailsContent,
+                  isItalic: true,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -65,8 +74,9 @@ class AboutCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Colors.grey[900],
+      color: Theme.of(context).cardColor.withOpacity(0.85),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      elevation: 4,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -74,10 +84,12 @@ class AboutCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.amber,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.lightGreenAccent
+                    : const Color.fromARGB(255, 82, 204, 88),
               ),
             ),
             const SizedBox(height: 10),
@@ -85,7 +97,7 @@ class AboutCard extends StatelessWidget {
               content,
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.white70,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
                 fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
               ),
             ),

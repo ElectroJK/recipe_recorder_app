@@ -23,13 +23,6 @@ class _RecipeRecorderAppState extends State<RecipeRecorderApp> {
     setState(() => _themeMode = mode);
   }
 
-  void _toggleTheme() {
-    setState(() {
-      _themeMode =
-          _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-    });
-  }
-
   void _changeLocale(Locale locale) {
     setState(() => _locale = locale);
   }
@@ -53,13 +46,17 @@ class _RecipeRecorderAppState extends State<RecipeRecorderApp> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: Builder(
-        builder: (context) {
-          return HomePage(
-            onThemeChanged: _changeTheme,
-            onLocaleChanged: _changeLocale,
-          );
-        },
+      home: Theme(
+        data: _themeMode == ThemeMode.dark ? darkTheme : lightTheme,
+        child: Builder(
+          builder: (context) {
+            return HomePage(
+              onThemeChanged: _changeTheme,
+              onLocaleChanged: _changeLocale,
+              currentTheme: _themeMode,
+            );
+          },
+        ),
       ),
     );
   }
