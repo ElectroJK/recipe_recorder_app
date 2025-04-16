@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -8,9 +9,12 @@ class AboutPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text(
-          "About Us",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        title: Text(
+          AppLocalizations.of(context)!.aboutUsTitle,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.black,
         elevation: 0,
@@ -23,24 +27,19 @@ class AboutPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AboutCard(
-                title: "About Recipe Recorder App",
+                title: AppLocalizations.of(context)!.aboutRecipeRecorderTitle,
                 content:
-                    "Recipe Recorder App helps users efficiently save and manage their favorite recipes. "
-                    "With an integrated database, users can securely store and access recipes anytime. "
-                    "The app also provides cooking tips and suggestions to enhance your culinary skills.",
+                    AppLocalizations.of(context)!.aboutRecipeRecorderContent,
               ),
               const SizedBox(height: 20),
               AboutCard(
-                title: "Developers",
-                content:
-                    "Developed by:\n\nTanatkanov Kadyrulan\nAsanali Ashimov\nZholaman Yerzhan",
+                title: AppLocalizations.of(context)!.developersTitle,
+                content: AppLocalizations.of(context)!.developersContent,
               ),
               const SizedBox(height: 20),
               AboutCard(
-                title: "Course Details",
-                content:
-                    "Course: Crossplatform Development, Astana IT University\n"
-                    "Mentor: Assistant Professor Abzal Kyzyrkanov",
+                title: AppLocalizations.of(context)!.courseDetailsTitle,
+                content: AppLocalizations.of(context)!.courseDetailsContent,
                 isItalic: true,
               ),
             ],
