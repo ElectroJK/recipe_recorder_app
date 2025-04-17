@@ -4,6 +4,7 @@ import '../aboutUs/aboutus.dart';
 import 'package:recipe_recorder_app/l10n/app_localizations_ext.dart';
 import 'package:recipe_recorder_app/logics/logic.dart';
 import 'package:recipe_recorder_app/design/theme.dart';
+import 'package:recipe_recorder_app/models/recipe.dart';
 
 class HomePage extends StatefulWidget {
   final void Function(ThemeMode) onThemeChanged;
@@ -23,13 +24,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
-  late List<Map<String, String>> localRecipes;
-  Set<Map<String, String>> favoriteRecipes = {};
+  late List<Recipe> localRecipes;
+  Set<Recipe> favoriteRecipes = {};
 
   @override
   void initState() {
     super.initState();
-    localRecipes = List<Map<String, String>>.from(recipes);
+    localRecipes = List<Recipe>.from(recipes);
   }
 
   @override
@@ -62,7 +63,9 @@ class _HomePageState extends State<HomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AboutPage(currentTheme: widget.currentTheme),
+                    builder:
+                        (context) =>
+                            AboutPage(currentTheme: widget.currentTheme),
                   ),
                 );
               },
@@ -84,12 +87,13 @@ class _HomePageState extends State<HomePage> {
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: Slidable(
-                        key: ValueKey(recipe['title'] ?? index),
+                        key: ValueKey(recipe.id),
                         endActionPane: ActionPane(
                           motion: const DrawerMotion(),
                           children: [
                             SlidableAction(
-                              onPressed: (_) => _toggleFavorite(recipe, context),
+                              onPressed:
+                                  (_) => _toggleFavorite(recipe, context),
                               backgroundColor: Colors.orange,
                               foregroundColor: Colors.white,
                               icon: Icons.star,
@@ -107,9 +111,9 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             _recipeCard(
                               context,
-                              context.l10n.getRecipeTitle(index + 1),
-                              context.l10n.getRecipeDescription(index + 1),
-                              recipe['image']!,
+                              recipe.title,
+                              recipe.description,
+                              recipe.image,
                             ),
                             if (favoriteRecipes.contains(recipe))
                               const Positioned(
@@ -157,24 +161,26 @@ class _HomePageState extends State<HomePage> {
                   height: 180,
                   child: Center(
                     child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
+                      value:
+                          loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                              : null,
                     ),
                   ),
                 );
               },
-              errorBuilder: (context, error, stackTrace) => Container(
-                height: 180,
-                color: Colors.grey[300],
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.broken_image,
-                  size: 40,
-                  color: Colors.grey,
-                ),
-              ),
+              errorBuilder:
+                  (context, error, stackTrace) => Container(
+                    height: 180,
+                    color: Colors.grey[300],
+                    alignment: Alignment.center,
+                    child: const Icon(
+                      Icons.broken_image,
+                      size: 40,
+                      color: Colors.grey,
+                    ),
+                  ),
             ),
           ),
           Padding(
@@ -193,7 +199,9 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 6),
                 Text(
                   description,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 15),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontSize: 15),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -204,23 +212,24 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> _confirmDelete(Map<String, String> recipe, BuildContext context) async {
+  Future<void> _confirmDelete(Recipe recipe, BuildContext context) async {
     final shouldDelete = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete recipe?'),
-        content: const Text('Are you sure you want to delete this recipe?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Delete recipe?'),
+            content: const Text('Are you sure you want to delete this recipe?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Delete'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
     );
 
     if (shouldDelete == true) {
@@ -228,7 +237,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _toggleFavorite(Map<String, String> recipe, BuildContext context) {
+  void _toggleFavorite(Recipe recipe, BuildContext context) {
     setState(() {
       if (favoriteRecipes.contains(recipe)) {
         favoriteRecipes.remove(recipe);
@@ -236,6 +245,7 @@ class _HomePageState extends State<HomePage> {
         favoriteRecipes.add(recipe);
       }
     });
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -247,39 +257,40 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _removeRecipe(Map<String, String> recipeToRemove) {
-    final index = localRecipes.indexOf(recipeToRemove);
+  void _removeRecipe(Recipe recipe) {
+    final index = localRecipes.indexWhere((r) => r.id == recipe.id);
     if (index == -1) return;
 
     final removedCard = Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: _recipeCard(
         context,
-        context.l10n.getRecipeTitle(index + 1),
-        context.l10n.getRecipeDescription(index + 1),
-        recipeToRemove['image']!,
+        recipe.title,
+        recipe.description,
+        recipe.image,
       ),
-    );
-
-    _listKey.currentState?.removeItem(
-      index,
-      (context, animation) => SizeTransition(sizeFactor: animation, child: removedCard),
-      duration: const Duration(milliseconds: 300),
     );
 
     setState(() {
       localRecipes.removeAt(index);
-      favoriteRecipes.remove(recipeToRemove);
+      favoriteRecipes.remove(recipe);
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Recipe deleted')),
+    _listKey.currentState?.removeItem(
+      index,
+      (context, animation) =>
+          SizeTransition(sizeFactor: animation, child: removedCard),
+      duration: const Duration(milliseconds: 300),
     );
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Recipe deleted')));
   }
 
   void _showLanguageBottomSheet(BuildContext context) {
     final isDarkMode = widget.currentTheme == ThemeMode.dark;
-    
+
     showModalBottomSheet(
       context: context,
       backgroundColor: isDarkMode ? Colors.black : Colors.white,
@@ -306,9 +317,24 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                _languageTile(context, 'English', const Locale('en'), isDarkMode),
-                _languageTile(context, 'Русский', const Locale('ru'), isDarkMode),
-                _languageTile(context, 'Қазақша', const Locale('kk'), isDarkMode),
+                _languageTile(
+                  context,
+                  'English',
+                  const Locale('en'),
+                  isDarkMode,
+                ),
+                _languageTile(
+                  context,
+                  'Русский',
+                  const Locale('ru'),
+                  isDarkMode,
+                ),
+                _languageTile(
+                  context,
+                  'Қазақша',
+                  const Locale('kk'),
+                  isDarkMode,
+                ),
               ],
             ),
           ),
@@ -317,8 +343,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _languageTile(BuildContext context, String name, Locale locale, bool isDarkMode) {
-    final isSelected = Localizations.localeOf(context).languageCode == locale.languageCode;
+  Widget _languageTile(
+    BuildContext context,
+    String name,
+    Locale locale,
+    bool isDarkMode,
+  ) {
+    final isSelected =
+        Localizations.localeOf(context).languageCode == locale.languageCode;
     return ListTile(
       title: Text(
         name,
@@ -327,10 +359,8 @@ class _HomePageState extends State<HomePage> {
           color: isDarkMode ? Colors.white : Colors.black,
         ),
       ),
-      trailing: isSelected
-          ? Icon(Icons.check_circle, color: isDarkMode ? Colors.green : Colors.green)
-          : null,
-      tileColor: isDarkMode ? Colors.black : Colors.white,
+      trailing:
+          isSelected ? Icon(Icons.check_circle, color: Colors.green) : null,
       onTap: () {
         widget.onLocaleChanged(locale);
         Navigator.pop(context);
