@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:recipe_recorder_app/homePage/FavoritesPage.dart';
+import 'package:recipe_recorder_app/homePage/SettingsPage.dart';
 import '../aboutUs/aboutus.dart';
 import 'package:recipe_recorder_app/l10n/app_localizations_ext.dart';
 import 'package:recipe_recorder_app/logics/logic.dart';
@@ -130,6 +132,38 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.favorite),
+              label: 'Favorites',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              label: 'Settings',
+            ),
+          ],
+          currentIndex: 0,
+          onTap: (index) {
+            if (index == 1) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) =>
+                          FavoritesPage(favoriteRecipes: favoriteRecipes),
+                ),
+              );
+            }
+            if (index == 2) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsPage()),
+              );
+            }
+          },
         ),
       ),
     );
