@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import 'homePage/home_page.dart';
 import 'design/theme.dart';
+import 'logics/logic.dart';
 
 void main() {
   runApp(const RecipeRecorderApp());
@@ -29,33 +31,25 @@ class _RecipeRecorderAppState extends State<RecipeRecorderApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Recipe Recorder',
-      theme: lightTheme,
-      darkTheme: darkTheme,
-      themeMode: _themeMode,
-      locale: _locale,
-      supportedLocales: const [
-        Locale('en', ''),
-        Locale('ru', ''),
-        Locale('kk', ''),
-      ],
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      home: Theme(
-        data: _themeMode == ThemeMode.dark ? darkTheme : lightTheme,
-        child: Builder(
-          builder: (context) {
-            return HomePage(
-              onThemeChanged: _changeTheme,
-              onLocaleChanged: _changeLocale,
-              currentTheme: _themeMode,
-            );
-          },
+    return ChangeNotifierProvider(
+      create: (_) => RecipeProvider(),
+      child: MaterialApp(
+        title: 'Recipe Recorder',
+        theme: lightTheme,
+        darkTheme: darkTheme,
+        themeMode: _themeMode,
+        locale: _locale,
+        supportedLocales: const [Locale('en'), Locale('ru'), Locale('kk')],
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: HomePage(
+          onThemeChanged: _changeTheme,
+          onLocaleChanged: _changeLocale,
+          currentTheme: _themeMode,
         ),
       ),
     );

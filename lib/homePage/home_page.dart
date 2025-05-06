@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:provider/provider.dart';
 import 'package:recipe_recorder_app/homePage/FavoritesPage.dart';
 import 'package:recipe_recorder_app/homePage/SettingsPage.dart';
 import '../aboutUs/aboutus.dart';
@@ -25,20 +26,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
-  late List<Recipe> localRecipes;
   Set<Recipe> favoriteRecipes = {};
-
-  @override
-  void initState() {
-    super.initState();
-    localRecipes = List<Recipe>.from(recipes);
-  }
 
   @override
   Widget build(BuildContext context) {
     final isDarkMode = widget.currentTheme == ThemeMode.dark;
     final gradient = isDarkMode ? getDarkGradient() : getLightGradient();
+    final recipes = context.watch<RecipeProvider>().recipes;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -79,58 +73,61 @@ class _HomePageState extends State<HomePage> {
             constraints: const BoxConstraints(maxWidth: 700),
             child: Padding(
               padding: const EdgeInsets.all(12),
-              child: AnimatedList(
-                key: _listKey,
-                initialItemCount: localRecipes.length,
-                itemBuilder: (context, index, animation) {
-                  final recipe = localRecipes[index];
-                  return SizeTransition(
-                    sizeFactor: animation,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Slidable(
-                        key: ValueKey(recipe.id),
-                        endActionPane: ActionPane(
-                          motion: const DrawerMotion(),
-                          children: [
-                            SlidableAction(
-                              onPressed:
-                                  (_) => _toggleFavorite(recipe, context),
-                              backgroundColor: Colors.orange,
-                              foregroundColor: Colors.white,
-                              icon: Icons.star,
-                              label: 'Favorites',
+              child: ListView.builder(
+                itemCount: recipes.length,
+                itemBuilder: (context, index) {
+                  final recipe = recipes[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Slidable(
+                      key: ValueKey(recipe.id),
+                      endActionPane: ActionPane(
+                        motion: const DrawerMotion(),
+                        children: [
+                          SlidableAction(
+                            onPressed: (_) => _toggleFavorite(recipe, context),
+                            backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                            icon: Icons.star,
+                            label: 'Favorites',
+                          ),
+                          SlidableAction(
+                            onPressed: (_) => _confirmDelete(recipe, context),
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            icon: Icons.delete,
+                          ),
+                        ],
+                      ),
+                      child: Stack(
+                        children: [
+                          _recipeCard(
+                            context,
+                            recipe.title,
+                            recipe.description,
+                            recipe.image,
+                          ),
+                          if (favoriteRecipes.contains(recipe))
+                            const Positioned(
+                              top: 8,
+                              right: 8,
+                              child: Icon(Icons.star, color: Colors.orange),
                             ),
-                            SlidableAction(
-                              onPressed: (_) => _confirmDelete(recipe, context),
-                              backgroundColor: Colors.red,
-                              foregroundColor: Colors.white,
-                              icon: Icons.delete,
-                            ),
-                          ],
-                        ),
-                        child: Stack(
-                          children: [
-                            _recipeCard(
-                              context,
-                              recipe.title,
-                              recipe.description,
-                              recipe.image,
-                            ),
-                            if (favoriteRecipes.contains(recipe))
-                              const Positioned(
-                                top: 8,
-                                right: 8,
-                                child: Icon(Icons.star, color: Colors.orange),
-                              ),
-                          ],
-                        ),
+                        ],
                       ),
                     ),
                   );
                 },
               ),
             ),
+          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => _showAddRecipeDialog(context),
+          backgroundColor: isDarkMode ? Colors.white : Colors.grey,
+          child: Icon(
+            Icons.add,
+            color: isDarkMode ? Colors.black : Colors.white,
           ),
         ),
         bottomNavigationBar: BottomNavigationBar(
@@ -164,6 +161,101 @@ class _HomePageState extends State<HomePage> {
               );
             }
           },
+        ),
+      ),
+    );
+  }
+
+  void _showAddRecipeDialog(BuildContext context) {
+    final titleController = TextEditingController();
+    final descriptionController = TextEditingController();
+    final imageController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Add New Recipe'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: const InputDecoration(labelText: 'Title'),
+                ),
+                TextField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(labelText: 'Description'),
+                ),
+                TextField(
+                  controller: imageController,
+                  decoration: const InputDecoration(labelText: 'Image URL'),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  if (titleController.text.isNotEmpty) {
+                    context.read<RecipeProvider>().addRecipe(
+                      titleController.text,
+                      descriptionController.text,
+                      imageController.text,
+                    );
+                  }
+                  Navigator.pop(context);
+                },
+                child: const Text('Add'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  Future<void> _confirmDelete(Recipe recipe, BuildContext context) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Delete recipe?'),
+            content: const Text('Are you sure you want to delete this recipe?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
+    );
+
+    if (shouldDelete == true) {
+      context.read<RecipeProvider>().removeRecipe(recipe.id);
+    }
+  }
+
+  void _toggleFavorite(Recipe recipe, BuildContext context) {
+    setState(() {
+      if (favoriteRecipes.contains(recipe)) {
+        favoriteRecipes.remove(recipe);
+      } else {
+        favoriteRecipes.add(recipe);
+      }
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          favoriteRecipes.contains(recipe)
+              ? '${recipe.title} added to favorites'
+              : '${recipe.title} removed from favorites',
         ),
       ),
     );
@@ -246,191 +338,88 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> _confirmDelete(Recipe recipe, BuildContext context) async {
-    final shouldDelete = await showDialog<bool>(
+  void _showLanguageBottomSheet(BuildContext context) {
+    showModalBottomSheet(
       context: context,
       builder:
-          (context) => AlertDialog(
-            title: const Text('Delete recipe?'),
-            content: const Text('Are you sure you want to delete this recipe?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
+          (context) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('English'),
+                onTap: () => widget.onLocaleChanged(const Locale('en')),
               ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('Delete'),
+              ListTile(
+                title: const Text('Русский'),
+                onTap: () => widget.onLocaleChanged(const Locale('ru')),
+              ),
+              ListTile(
+                title: const Text('Қазақша'),
+                onTap: () => widget.onLocaleChanged(const Locale('kk')),
               ),
             ],
           ),
-    );
-
-    if (shouldDelete == true) {
-      _removeRecipe(recipe);
-    }
-  }
-
-  void _toggleFavorite(Recipe recipe, BuildContext context) {
-    setState(() {
-      if (favoriteRecipes.contains(recipe)) {
-        favoriteRecipes.remove(recipe);
-      } else {
-        favoriteRecipes.add(recipe);
-      }
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          favoriteRecipes.contains(recipe)
-              ? 'Added to favorites'
-              : 'Removed from favorites',
-        ),
-      ),
-    );
-  }
-
-  void _removeRecipe(Recipe recipe) {
-    final index = localRecipes.indexWhere((r) => r.id == recipe.id);
-    if (index == -1) return;
-
-    final removedCard = Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: _recipeCard(
-        context,
-        recipe.title,
-        recipe.description,
-        recipe.image,
-      ),
-    );
-
-    setState(() {
-      localRecipes.removeAt(index);
-      favoriteRecipes.remove(recipe);
-    });
-
-    _listKey.currentState?.removeItem(
-      index,
-      (context, animation) =>
-          SizeTransition(sizeFactor: animation, child: removedCard),
-      duration: const Duration(milliseconds: 300),
-    );
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Recipe deleted')));
-  }
-
-  void _showLanguageBottomSheet(BuildContext context) {
-    final isDarkMode = widget.currentTheme == ThemeMode.dark;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: isDarkMode ? Colors.black : Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return Container(
-          decoration: BoxDecoration(
-            color: isDarkMode ? Colors.black : Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  context.l10n.language,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white : Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _languageTile(
-                  context,
-                  'English',
-                  const Locale('en'),
-                  isDarkMode,
-                ),
-                _languageTile(
-                  context,
-                  'Русский',
-                  const Locale('ru'),
-                  isDarkMode,
-                ),
-                _languageTile(
-                  context,
-                  'Қазақша',
-                  const Locale('kk'),
-                  isDarkMode,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _languageTile(
-    BuildContext context,
-    String name,
-    Locale locale,
-    bool isDarkMode,
-  ) {
-    final isSelected =
-        Localizations.localeOf(context).languageCode == locale.languageCode;
-    return ListTile(
-      title: Text(
-        name,
-        style: TextStyle(
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          color: isDarkMode ? Colors.white : Colors.black,
-        ),
-      ),
-      trailing:
-          isSelected ? Icon(Icons.check_circle, color: Colors.green) : null,
-      onTap: () {
-        widget.onLocaleChanged(locale);
-        Navigator.pop(context);
-      },
     );
   }
 
   void _showThemeBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.light_mode),
-              title: const Text('Light Theme'),
-              onTap: () {
-                widget.onThemeChanged(ThemeMode.light);
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.dark_mode),
-              title: const Text('Dark Theme'),
-              onTap: () {
-                widget.onThemeChanged(ThemeMode.dark);
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        );
-      },
+      builder:
+          (context) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('Light'),
+                onTap: () => widget.onThemeChanged(ThemeMode.light),
+              ),
+              ListTile(
+                title: const Text('Dark'),
+                onTap: () => widget.onThemeChanged(ThemeMode.dark),
+              ),
+              ListTile(
+                title: const Text('System'),
+                onTap: () => widget.onThemeChanged(ThemeMode.system),
+              ),
+            ],
+          ),
     );
   }
+}
+
+void showLanguageBottomSheet(
+  BuildContext context,
+  Function(Locale) onLocaleChanged,
+) {
+  showModalBottomSheet(
+    context: context,
+    builder: (context) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            title: const Text('English'),
+            onTap: () {
+              onLocaleChanged(const Locale('en'));
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: const Text('Russian'),
+            onTap: () {
+              onLocaleChanged(const Locale('ru'));
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: const Text('Kazakh'),
+            onTap: () {
+              onLocaleChanged(const Locale('kk'));
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      );
+    },
+  );
 }
