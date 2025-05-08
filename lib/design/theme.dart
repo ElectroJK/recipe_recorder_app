@@ -85,7 +85,6 @@ final ThemeData darkTheme = ThemeData(
   ).copyWith(primary: _darkAccent, secondary: _darkSecondary),
 );
 
-// ⬇️ Добавленные градиенты для AboutPage
 LinearGradient getLightGradient() {
   return const LinearGradient(
     begin: Alignment.topCenter,

@@ -52,5 +52,17 @@
   "recipeTitle5": "Pancakes",
   "recipeDescription5": "Fluffy pancakes with maple syrup.",
   "recipeTitle6": "Tomato Soup",
-  "recipeDescription6": "Warm soup with fresh tomatoes and herbs."
+  "recipeDescription6": "Warm soup with fresh tomatoes and herbs.",
+  "addRecipe": "Add New Recipe",
+"titleLabel": "Title",
+"descriptionLabel": "Description",
+"imageLabel": "Image URL",
+"favoritesLabel": "Favorites",
+"delete": "Delete",
+"cancel": "Cancel",
+"add": "Add",
+"deleteRecipeTitle": "Delete recipe?",
+"deleteRecipeConfirmation": "Are you sure you want to delete this recipe?",
+"recipeAddedToFavorites": "{recipe} added to favorites",
+"recipeRemovedFromFavorites": "{recipe} removed from favorites"
 }

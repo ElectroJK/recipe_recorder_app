@@ -52,5 +52,17 @@
   "recipeTitle5": "Панкейки",
   "recipeDescription5": "Пышные панкейки с кленовым сиропом.",
   "recipeTitle6": "Томатный суп",
-  "recipeDescription6": "Тёплый суп с помидорами и зеленью."
+  "recipeDescription6": "Тёплый суп с помидорами и зеленью.",
+   "addRecipe": "Добавить новый рецепт",
+  "titleLabel": "Название",
+  "descriptionLabel": "Описание",
+  "imageLabel": "Ссылка на изображение",
+  "favoritesLabel": "Избранное",
+  "delete": "Удалить",
+  "cancel": "Отмена",
+  "add": "Добавить",
+  "deleteRecipeTitle": "Удалить рецепт?",
+  "deleteRecipeConfirmation": "Вы уверены, что хотите удалить этот рецепт?",
+  "recipeAddedToFavorites": "{recipe} добавлен в избранное",
+  "recipeRemovedFromFavorites": "{recipe} удалён из избранного"
 }

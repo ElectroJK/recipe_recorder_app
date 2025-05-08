@@ -52,5 +52,17 @@
   "recipeTitle5": "Панкейк",
   "recipeDescription5": "Клен сиропы қосылған жұмсақ панкейк.",
   "recipeTitle6": "Томатты сорпа",
-  "recipeDescription6": "Томат пен шөптер қосылған ыстық сорпа."
+  "recipeDescription6": "Томат пен шөптер қосылған ыстық сорпа.",
+   "addRecipe": "Жаңа рецепт қосу",
+  "titleLabel": "Атауы",
+  "descriptionLabel": "Сипаттамасы",
+  "imageLabel": "Сурет URL",
+  "favoritesLabel": "Таңдаулылар",
+  "delete": "Жою",
+  "cancel": "Бас тарту",
+  "add": "Қосу",
+  "deleteRecipeTitle": "Рецептті жою?",
+  "deleteRecipeConfirmation": "Бұл рецептті жойғыңыз келетініне сенімдісіз бе?",
+  "recipeAddedToFavorites": "{recipe} таңдаулыларға қосылды",
+  "recipeRemovedFromFavorites": "{recipe} таңдаулылардан өшірілді"
 }

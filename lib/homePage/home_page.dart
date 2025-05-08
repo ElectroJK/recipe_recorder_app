@@ -81,13 +81,14 @@ class _HomePageState extends State<HomePage> {
                             backgroundColor: Colors.orange,
                             foregroundColor: Colors.white,
                             icon: Icons.star,
-                            label: 'Favorites',
+                            label: context.l10n.favoritesLabel,
                           ),
                           SlidableAction(
                             onPressed: (_) => _confirmDelete(recipe, context),
                             backgroundColor: Colors.red,
                             foregroundColor: Colors.white,
                             icon: Icons.delete,
+                            label: context.l10n.delete,
                           ),
                         ],
                       ),
@@ -123,15 +124,18 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         bottomNavigationBar: BottomNavigationBar(
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.favorite),
-              label: 'Favorites',
+              icon: const Icon(Icons.home),
+              label: context.l10n.bottomNavHome,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: 'Settings',
+              icon: const Icon(Icons.favorite),
+              label: context.l10n.bottomNavFavorites,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.settings),
+              label: context.l10n.bottomNavSettings,
             ),
           ],
           currentIndex: 0,
@@ -175,28 +179,34 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Add New Recipe'),
+            title: Text(context.l10n.addRecipe),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: titleController,
-                  decoration: const InputDecoration(labelText: 'Title'),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.titleLabel,
+                  ),
                 ),
                 TextField(
                   controller: descriptionController,
-                  decoration: const InputDecoration(labelText: 'Description'),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.descriptionLabel,
+                  ),
                 ),
                 TextField(
                   controller: imageController,
-                  decoration: const InputDecoration(labelText: 'Image URL'),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.imageLabel,
+                  ),
                 ),
               ],
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
+                child: Text(context.l10n.cancel),
               ),
               TextButton(
                 onPressed: () {
@@ -209,7 +219,7 @@ class _HomePageState extends State<HomePage> {
                   }
                   Navigator.pop(context);
                 },
-                child: const Text('Add'),
+                child: Text(context.l10n.add),
               ),
             ],
           ),
@@ -221,16 +231,16 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Delete recipe?'),
-            content: const Text('Are you sure you want to delete this recipe?'),
+            title: Text(context.l10n.deleteRecipeTitle),
+            content: Text(context.l10n.deleteRecipeConfirmation),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
+                child: Text(context.l10n.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('Delete'),
+                child: Text(context.l10n.delete),
               ),
             ],
           ),
@@ -254,8 +264,8 @@ class _HomePageState extends State<HomePage> {
       SnackBar(
         content: Text(
           favoriteRecipes.contains(recipe)
-              ? '${recipe.title} added to favorites'
-              : '${recipe.title} removed from favorites',
+              ? context.l10n.recipeAddedToFavorites(recipe.title)
+              : context.l10n.recipeRemovedFromFavorites(recipe.title),
         ),
       ),
     );
