@@ -64,5 +64,8 @@
 "deleteRecipeTitle": "Delete recipe?",
 "deleteRecipeConfirmation": "Are you sure you want to delete this recipe?",
 "recipeAddedToFavorites": "{recipe} added to favorites",
-"recipeRemovedFromFavorites": "{recipe} removed from favorites"
+"recipeRemovedFromFavorites": "{recipe} removed from favorites",
+"favoritesPageTitle": "Favorites",
+"favoritesPageEmpty": "No favorites yet!"
+
 }

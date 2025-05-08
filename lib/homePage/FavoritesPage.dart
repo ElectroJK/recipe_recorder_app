@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:recipe_recorder_app/models/recipe.dart';
+import 'package:recipe_recorder_app/l10n/app_localizations_ext.dart';
 
 class FavoritesPage extends StatelessWidget {
-  final Set<Recipe> favoriteRecipes; // ✅ принимаем список рецептов
+  final Set<Recipe> favoriteRecipes;
 
-  const FavoritesPage({
-    super.key,
-    required this.favoriteRecipes,
-  }); // ✅ передаём через конструктор
+  const FavoritesPage({super.key, required this.favoriteRecipes});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Favorites')),
+      appBar: AppBar(title: Text(context.l10n.favoritesPageTitle)),
       body:
           favoriteRecipes.isEmpty
-              ? const Center(child: Text('No favorites yet!'))
+              ? Center(child: Text(context.l10n.favoritesPageEmpty))
               : ListView.builder(
                 itemCount: favoriteRecipes.length,
                 itemBuilder: (context, index) {

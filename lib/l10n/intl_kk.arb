@@ -64,5 +64,7 @@
   "deleteRecipeTitle": "Рецептті жою?",
   "deleteRecipeConfirmation": "Бұл рецептті жойғыңыз келетініне сенімдісіз бе?",
   "recipeAddedToFavorites": "{recipe} таңдаулыларға қосылды",
-  "recipeRemovedFromFavorites": "{recipe} таңдаулылардан өшірілді"
+  "recipeRemovedFromFavorites": "{recipe} таңдаулылардан өшірілді",
+  "favoritesPageTitle": "Таңдаулылар",
+"favoritesPageEmpty": "Таңдаулылар бос!"
 }

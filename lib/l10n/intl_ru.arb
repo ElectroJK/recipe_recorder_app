@@ -64,5 +64,8 @@
   "deleteRecipeTitle": "Удалить рецепт?",
   "deleteRecipeConfirmation": "Вы уверены, что хотите удалить этот рецепт?",
   "recipeAddedToFavorites": "{recipe} добавлен в избранное",
-  "recipeRemovedFromFavorites": "{recipe} удалён из избранного"
+  "recipeRemovedFromFavorites": "{recipe} удалён из избранного",
+  "favoritesPageTitle": "Избранное",
+"favoritesPageEmpty": "Пока нет избранных рецептов!"
+
 }
