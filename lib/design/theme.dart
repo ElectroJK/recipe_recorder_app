@@ -1,37 +1,53 @@
 import 'package:flutter/material.dart';
 
-// Light theme colors
-const _lightPrimary = Colors.white;
-const _lightSecondary = Color.fromARGB(255, 184, 255, 190); // Light green
-const _lightCard = Color(0xFFF5F5F5);
+// Light theme colors (уютные, тёплые тона)
+const _lightPrimary = Color(0xFFFFFBF2); // молочно-кремовый
+const _lightSecondary = Color(0xFFFFF3E0); // персиковый фон
+const _lightCard = Color(0xFFFFFFFF); // белый фон карточек
+const _lightAccent = Color(0xFF8D6E63); // кофейный акцент
+const _lightNavBar = Color(0xFFFFE0B2); // светло-оранжевый
+const _lightNavBarIcon = Color(0xFF5D4037); // тёмный шоколад
 
-// Dark theme colors
-const _darkPrimary = Colors.black;
-const _darkSecondary = Color(0xFF1B5E20); // Dark green
-const _darkCard = Color.fromARGB(255, 30, 30, 30);
+// Dark theme colors (тёмные уютные оттенки)
+const _darkPrimary = Color(0xFF1C1C1C); // тёмно-шоколадный
+const _darkSecondary = Color(0xFF2C2C2C); // серо-коричневый
+const _darkCard = Color(0xFF333333); // тёмная карточка
+const _darkAccent = Color(0xFFFFA726); // акцент - карамель
+const _darkNavBar = Color(0xFF2E2E2E); // тёмный фон
+const _darkNavBarIcon = Color(0xFFFFCC80); // светлая карамель
 
 final ThemeData lightTheme = ThemeData(
   scaffoldBackgroundColor: _lightPrimary,
   appBarTheme: const AppBarTheme(
     backgroundColor: _lightPrimary,
     elevation: 0,
-    iconTheme: IconThemeData(color: Colors.black),
+    iconTheme: IconThemeData(color: _lightNavBarIcon),
     titleTextStyle: TextStyle(
-      color: Colors.black,
-      fontSize: 20,
+      color: _lightNavBarIcon,
+      fontSize: 22,
       fontWeight: FontWeight.bold,
     ),
   ),
-  textTheme: const TextTheme(
-    bodyLarge: TextStyle(color: Colors.black),
-    bodyMedium: TextStyle(color: Colors.black87),
+  bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+    backgroundColor: _lightNavBar,
+    selectedItemColor: _lightNavBarIcon,
+    unselectedItemColor: Colors.brown,
   ),
-  cardColor: const Color.fromARGB(255, 248, 255, 249),
+  textTheme: const TextTheme(
+    bodyLarge: TextStyle(color: Colors.brown),
+    bodyMedium: TextStyle(color: Colors.black54),
+  ),
+  cardColor: _lightCard,
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.green[700],
+      backgroundColor: _lightAccent,
       foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
+  ),
+  colorScheme: ColorScheme.fromSwatch().copyWith(
+    primary: _lightAccent,
+    secondary: _lightSecondary,
   ),
 );
 
@@ -40,31 +56,41 @@ final ThemeData darkTheme = ThemeData(
   appBarTheme: const AppBarTheme(
     backgroundColor: _darkPrimary,
     elevation: 0,
-    iconTheme: IconThemeData(color: Colors.white),
+    iconTheme: IconThemeData(color: _darkNavBarIcon),
     titleTextStyle: TextStyle(
-      color: Colors.white,
-      fontSize: 20,
+      color: _darkNavBarIcon,
+      fontSize: 22,
       fontWeight: FontWeight.bold,
     ),
   ),
+  bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+    backgroundColor: _darkNavBar,
+    selectedItemColor: _darkNavBarIcon,
+    unselectedItemColor: Colors.grey,
+  ),
   textTheme: const TextTheme(
     bodyLarge: TextStyle(color: Colors.white),
-    bodyMedium: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+    bodyMedium: TextStyle(color: Colors.white70),
   ),
-  cardColor: const Color.fromARGB(255, 138, 164, 147),
+  cardColor: _darkCard,
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.green[900],
-      foregroundColor: Colors.white,
+      backgroundColor: _darkAccent,
+      foregroundColor: Colors.black,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
   ),
+  colorScheme: ColorScheme.fromSwatch(
+    brightness: Brightness.dark,
+  ).copyWith(primary: _darkAccent, secondary: _darkSecondary),
 );
 
+// ⬇️ Добавленные градиенты для AboutPage
 LinearGradient getLightGradient() {
   return const LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [_lightPrimary, _lightSecondary],
+    colors: [_lightSecondary, _lightPrimary],
   );
 }
 
@@ -72,6 +98,6 @@ LinearGradient getDarkGradient() {
   return const LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [_darkPrimary, _darkSecondary],
+    colors: [_darkSecondary, _darkPrimary],
   );
 }

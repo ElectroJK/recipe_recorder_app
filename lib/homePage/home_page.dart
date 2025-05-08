@@ -46,14 +46,6 @@ class _HomePageState extends State<HomePage> {
           iconTheme: IconThemeData(color: Theme.of(context).iconTheme.color),
           actions: [
             IconButton(
-              icon: const Icon(Icons.language),
-              onPressed: () => _showLanguageBottomSheet(context),
-            ),
-            IconButton(
-              icon: const Icon(Icons.brightness_6),
-              onPressed: () => _showThemeBottomSheet(context),
-            ),
-            IconButton(
               icon: const Icon(Icons.info_outline),
               onPressed: () {
                 Navigator.push(
@@ -157,7 +149,15 @@ class _HomePageState extends State<HomePage> {
             if (index == 2) {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => SettingsPage()),
+                MaterialPageRoute(
+                  builder: (context) => const SettingsPage(),
+                  settings: RouteSettings(
+                    arguments: {
+                      'onThemeChanged': widget.onThemeChanged,
+                      'onLocaleChanged': widget.onLocaleChanged,
+                    },
+                  ),
+                ),
               );
             }
           },
@@ -337,89 +337,4 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
-  void _showLanguageBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder:
-          (context) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: const Text('English'),
-                onTap: () => widget.onLocaleChanged(const Locale('en')),
-              ),
-              ListTile(
-                title: const Text('Русский'),
-                onTap: () => widget.onLocaleChanged(const Locale('ru')),
-              ),
-              ListTile(
-                title: const Text('Қазақша'),
-                onTap: () => widget.onLocaleChanged(const Locale('kk')),
-              ),
-            ],
-          ),
-    );
-  }
-
-  void _showThemeBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder:
-          (context) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: const Text('Light'),
-                onTap: () => widget.onThemeChanged(ThemeMode.light),
-              ),
-              ListTile(
-                title: const Text('Dark'),
-                onTap: () => widget.onThemeChanged(ThemeMode.dark),
-              ),
-              ListTile(
-                title: const Text('System'),
-                onTap: () => widget.onThemeChanged(ThemeMode.system),
-              ),
-            ],
-          ),
-    );
-  }
-}
-
-void showLanguageBottomSheet(
-  BuildContext context,
-  Function(Locale) onLocaleChanged,
-) {
-  showModalBottomSheet(
-    context: context,
-    builder: (context) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            title: const Text('English'),
-            onTap: () {
-              onLocaleChanged(const Locale('en'));
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: const Text('Russian'),
-            onTap: () {
-              onLocaleChanged(const Locale('ru'));
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: const Text('Kazakh'),
-            onTap: () {
-              onLocaleChanged(const Locale('kk'));
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      );
-    },
-  );
 }

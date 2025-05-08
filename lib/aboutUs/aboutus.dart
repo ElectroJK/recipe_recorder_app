@@ -11,43 +11,44 @@ class AboutPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDarkMode = currentTheme == ThemeMode.dark;
     final gradient = isDarkMode ? getDarkGradient() : getLightGradient();
+    final l10n = AppLocalizations.of(context)!;
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      decoration: BoxDecoration(gradient: gradient),
-      child: Scaffold(
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: Text(
-            AppLocalizations.of(context)!.aboutUsTitle,
-            style: TextStyle(
-              color: Theme.of(context).textTheme.bodyLarge?.color,
-              fontWeight: FontWeight.bold,
-            ),
+        elevation: 0,
+        iconTheme: IconThemeData(color: Theme.of(context).iconTheme.color),
+        title: Text(
+          l10n.aboutUsTitle,
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+            fontWeight: FontWeight.bold,
           ),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          iconTheme: IconThemeData(color: Theme.of(context).iconTheme.color),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
+      ),
+      body: Container(
+        decoration: BoxDecoration(gradient: gradient),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, kToolbarHeight + 24, 16, 16),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 AboutCard(
-                  title: AppLocalizations.of(context)!.aboutRecipeRecorderTitle,
-                  content: AppLocalizations.of(context)!.aboutRecipeRecorderContent,
+                  title: l10n.aboutRecipeRecorderTitle,
+                  content: l10n.aboutRecipeRecorderContent,
                 ),
                 const SizedBox(height: 20),
                 AboutCard(
-                  title: AppLocalizations.of(context)!.developersTitle,
-                  content: AppLocalizations.of(context)!.developersContent,
+                  title: l10n.developersTitle,
+                  content: l10n.developersContent,
                 ),
                 const SizedBox(height: 20),
                 AboutCard(
-                  title: AppLocalizations.of(context)!.courseDetailsTitle,
-                  content: AppLocalizations.of(context)!.courseDetailsContent,
+                  title: l10n.courseDetailsTitle,
+                  content: l10n.courseDetailsContent,
                   isItalic: true,
                 ),
               ],
@@ -74,7 +75,7 @@ class AboutCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Theme.of(context).cardColor.withOpacity(0.85),
+      color: Theme.of(context).cardColor.withOpacity(0.92),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       elevation: 4,
       child: Padding(
@@ -87,9 +88,10 @@ class AboutCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.lightGreenAccent
-                    : const Color.fromARGB(255, 82, 204, 88),
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF81C784)
+                        : const Color(0xFF388E3C),
               ),
             ),
             const SizedBox(height: 10),
