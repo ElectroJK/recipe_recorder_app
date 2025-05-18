@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "929762269873",
+    "project_id": "recipe-recorder-app",
+    "storage_bucket": "recipe-recorder-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:929762269873:android:2524f4ae2cd73ff2746090",
+        "android_client_info": {
+          "package_name": "com.example.recipe_recorder_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-MZq2fly7DURtN9lTxSiNCTJnAh-V1QM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

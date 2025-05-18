@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// Light theme colors (уютные, тёплые тона)
 const _lightPrimary = Color(0xFFFFFBF2); // молочно-кремовый
 const _lightSecondary = Color(0xFFFFF3E0); // персиковый фон
 const _lightCard = Color(0xFFFFFFFF); // белый фон карточек
@@ -8,7 +7,6 @@ const _lightAccent = Color(0xFF8D6E63); // кофейный акцент
 const _lightNavBar = Color(0xFFFFE0B2); // светло-оранжевый
 const _lightNavBarIcon = Color(0xFF5D4037); // тёмный шоколад
 
-// Dark theme colors (тёмные уютные оттенки)
 const _darkPrimary = Color(0xFF1C1C1C); // тёмно-шоколадный
 const _darkSecondary = Color(0xFF2C2C2C); // серо-коричневый
 const _darkCard = Color(0xFF333333); // тёмная карточка

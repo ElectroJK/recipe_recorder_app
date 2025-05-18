@@ -1,56 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+
+import 'package:recipe_recorder_app/userData/UserSettingProvider.dart';
+import 'models/recipe_controller.dart';
 import 'homePage/home_page.dart';
+import 'userData/login_page.dart';
 import 'design/theme.dart';
-import 'logics/logic.dart';
 
-void main() {
-  runApp(const RecipeRecorderApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => RecipeController()),
+        ChangeNotifierProvider(create: (_) => UserSettingsProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
-class RecipeRecorderApp extends StatefulWidget {
-  const RecipeRecorderApp({super.key});
-
-  @override
-  State<RecipeRecorderApp> createState() => _RecipeRecorderAppState();
-}
-
-class _RecipeRecorderAppState extends State<RecipeRecorderApp> {
-  ThemeMode _themeMode = ThemeMode.light;
-  Locale _locale = const Locale('en');
-
-  void _changeTheme(ThemeMode mode) {
-    setState(() => _themeMode = mode);
-  }
-
-  void _changeLocale(Locale locale) {
-    setState(() => _locale = locale);
-  }
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => RecipeProvider(),
-      child: MaterialApp(
-        title: 'Recipe Recorder',
-        theme: lightTheme,
-        darkTheme: darkTheme,
-        themeMode: _themeMode,
-        locale: _locale,
-        supportedLocales: const [Locale('en'), Locale('ru'), Locale('kk')],
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        home: HomePage(
-          onThemeChanged: _changeTheme,
-          onLocaleChanged: _changeLocale,
-          currentTheme: _themeMode,
-        ),
+    final userSettings = Provider.of<UserSettingsProvider>(context);
+
+    return MaterialApp(
+      title: 'Recipe Recorder',
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: userSettings.themeMode,
+      locale: userSettings.locale,
+      supportedLocales: const [Locale('en'), Locale('ru'), Locale('kk')],
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      home: LoginPage(
+        currentTheme: userSettings.themeMode,
+        onThemeChanged: userSettings.setThemeMode,
+        onLocaleChanged: userSettings.setLocale,
       ),
     );
   }

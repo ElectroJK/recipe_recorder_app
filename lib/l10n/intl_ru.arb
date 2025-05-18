@@ -66,6 +66,26 @@
   "recipeAddedToFavorites": "{recipe} добавлен в избранное",
   "recipeRemovedFromFavorites": "{recipe} удалён из избранного",
   "favoritesPageTitle": "Избранное",
-"favoritesPageEmpty": "Пока нет избранных рецептов!"
-
+"favoritesPageEmpty": "Пока нет избранных рецептов!",
+"profilePageTitle": "Профиль",
+"logout": "Выйти",
+"errorLoadingRecipes": "ошибка при загрузке рецептов",
+ "login": "Войти",
+  "register": "Регистрация",
+  "email": "Электронная почта",
+  "password": "Пароль",
+  "confirmPassword": "Подтвердите пароль",
+  "username": "Имя пользователя",
+  "fillAllFields": "Пожалуйста, заполните все поля",
+  "passwordsDoNotMatch": "Пароли не совпадают",
+  "registrationSuccess": "Вы успешно зарегистрированы",
+  "registrationFailed": "Ошибка регистрации",
+  "loginFailed": "Ошибка входа",
+  "dontHaveAccountRegister": "Нет аккаунта? Зарегистрируйтесь здесь",
+  "english": "Английский",
+  "russian": "Русский",
+  "kazakh": "Казахский",
+  "profile": "Профиль",
+  "continueAsGuest": "Продолжить как гость",
+  "userNotLoggedIn": "Пользователь не вошёл в систему"
 }

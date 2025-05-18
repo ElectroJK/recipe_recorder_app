@@ -1,38 +1,74 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:provider/provider.dart';
+import 'package:recipe_recorder_app/aboutUs/aboutus.dart';
 import 'package:recipe_recorder_app/homePage/FavoritesPage.dart';
+import 'package:recipe_recorder_app/homePage/ProfilePage.dart';
 import 'package:recipe_recorder_app/homePage/SettingsPage.dart';
-import '../aboutUs/aboutus.dart';
 import 'package:recipe_recorder_app/l10n/app_localizations_ext.dart';
-import 'package:recipe_recorder_app/logics/logic.dart';
 import 'package:recipe_recorder_app/design/theme.dart';
 import 'package:recipe_recorder_app/models/recipe.dart';
+import 'package:recipe_recorder_app/userData/UserSettingProvider.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   final void Function(ThemeMode) onThemeChanged;
   final void Function(Locale) onLocaleChanged;
   final ThemeMode currentTheme;
+  final bool isGuest;
 
   const HomePage({
-    super.key,
+    Key? key,
     required this.onThemeChanged,
     required this.onLocaleChanged,
     required this.currentTheme,
-  });
+    this.isGuest = false,
+  }) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  Set<Recipe> favoriteRecipes = {};
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  Set<String> favoriteRecipeIds = {};
+  int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFavorites();
+  }
+
+  Future<void> _loadFavorites() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final snapshot =
+        await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('recipes')
+            .where('favorites', isEqualTo: true)
+            .get();
+
+    setState(() {
+      favoriteRecipeIds = snapshot.docs.map((doc) => doc.id).toSet();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = widget.currentTheme == ThemeMode.dark;
+    final userSettings = context.read<UserSettingsProvider>();
+    final isDarkMode = userSettings.themeMode == ThemeMode.dark;
     final gradient = isDarkMode ? getDarkGradient() : getLightGradient();
-    final recipes = context.watch<RecipeProvider>().recipes;
+    final user = _auth.currentUser;
+
+    if (user == null) {
+      return Scaffold(body: Center(child: Text(context.l10n.userNotLoggedIn)));
+    }
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -52,8 +88,7 @@ class _HomePageState extends State<HomePage> {
                   context,
                   MaterialPageRoute(
                     builder:
-                        (context) =>
-                            AboutPage(currentTheme: widget.currentTheme),
+                        (_) => AboutPage(currentTheme: userSettings.themeMode),
                   ),
                 );
               },
@@ -65,51 +100,82 @@ class _HomePageState extends State<HomePage> {
             constraints: const BoxConstraints(maxWidth: 700),
             child: Padding(
               padding: const EdgeInsets.all(12),
-              child: ListView.builder(
-                itemCount: recipes.length,
-                itemBuilder: (context, index) {
-                  final recipe = recipes[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Slidable(
-                      key: ValueKey(recipe.id),
-                      endActionPane: ActionPane(
-                        motion: const DrawerMotion(),
-                        children: [
-                          SlidableAction(
-                            onPressed: (_) => _toggleFavorite(recipe, context),
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
-                            icon: Icons.star,
-                            label: context.l10n.favoritesLabel,
-                          ),
-                          SlidableAction(
-                            onPressed: (_) => _confirmDelete(recipe, context),
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                            icon: Icons.delete,
-                            label: context.l10n.delete,
-                          ),
-                        ],
-                      ),
-                      child: Stack(
-                        children: [
-                          _recipeCard(
-                            context,
-                            recipe.title,
-                            recipe.description,
-                            recipe.image,
-                          ),
-                          if (favoriteRecipes.contains(recipe))
-                            const Positioned(
-                              top: 8,
-                              right: 8,
-                              child: Icon(Icons.star, color: Colors.orange),
+              child: StreamBuilder<QuerySnapshot>(
+                stream:
+                    _firestore
+                        .collection('users')
+                        .doc(user.uid)
+                        .collection('recipes')
+                        .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text(context.l10n.errorLoadingRecipes),
+                    );
+                  }
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final docs = snapshot.data!.docs;
+                  final recipeCards =
+                      docs.map((doc) {
+                        final data = doc.data()! as Map<String, dynamic>;
+                        final recipeId = doc.id;
+                        final title = data['title'] ?? '';
+                        final description = data['description'] ?? '';
+                        final image = data['image'] ?? '';
+                        final isFavorite = data['favorites'] ?? false;
+
+                        if (isFavorite) {
+                          favoriteRecipeIds.add(recipeId);
+                        } else {
+                          favoriteRecipeIds.remove(recipeId);
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Slidable(
+                            key: ValueKey(recipeId),
+                            endActionPane: ActionPane(
+                              motion: const DrawerMotion(),
+                              children: [
+                                SlidableAction(
+                                  onPressed:
+                                      (_) => _toggleFavorite(recipeId, title),
+                                  backgroundColor: Colors.orange,
+                                  foregroundColor: Colors.white,
+                                  icon: Icons.star,
+                                  label: context.l10n.favoritesLabel,
+                                ),
+                                SlidableAction(
+                                  onPressed: (_) => _confirmDelete(recipeId),
+                                  backgroundColor: Colors.red,
+                                  foregroundColor: Colors.white,
+                                  icon: Icons.delete,
+                                  label: context.l10n.delete,
+                                ),
+                              ],
                             ),
-                        ],
-                      ),
-                    ),
-                  );
+                            child: Stack(
+                              children: [
+                                _recipeCard(context, title, description, image),
+                                if (isFavorite)
+                                  const Positioned(
+                                    top: 8,
+                                    right: 8,
+                                    child: Icon(
+                                      Icons.star,
+                                      color: Colors.orange,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList();
+
+                  return ListView(children: recipeCards);
                 },
               ),
             ),
@@ -124,6 +190,8 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          currentIndex: _selectedIndex,
           items: [
             BottomNavigationBarItem(
               icon: const Icon(Icons.home),
@@ -137,37 +205,66 @@ class _HomePageState extends State<HomePage> {
               icon: const Icon(Icons.settings),
               label: context.l10n.bottomNavSettings,
             ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.person),
+              label: context.l10n.profilePageTitle,
+            ),
           ],
-          currentIndex: 0,
-          onTap: (index) {
+          onTap: (index) async {
+            if (_selectedIndex == index) return;
+            setState(() => _selectedIndex = index);
+
             if (index == 1) {
+              final favorites = await _fetchFavoriteRecipes(user.uid);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => FavoritesPage(favoriteRecipes: favorites),
+                ),
+              );
+            } else if (index == 2) {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder:
-                      (context) =>
-                          FavoritesPage(favoriteRecipes: favoriteRecipes),
+                      (_) => SettingsPage(
+                        currentTheme: userSettings.themeMode,
+                        onThemeChanged: widget.onThemeChanged,
+                        onLocaleChanged: widget.onLocaleChanged,
+                      ),
                 ),
               );
-            }
-            if (index == 2) {
+            } else if (index == 3) {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const SettingsPage(),
-                  settings: RouteSettings(
-                    arguments: {
-                      'onThemeChanged': widget.onThemeChanged,
-                      'onLocaleChanged': widget.onLocaleChanged,
-                    },
-                  ),
-                ),
+                MaterialPageRoute(builder: (_) => const ProfilePage()),
               );
             }
           },
         ),
       ),
     );
+  }
+
+  Future<List<Recipe>> _fetchFavoriteRecipes(String userId) async {
+    final snapshot =
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('recipes')
+            .where('favorites', isEqualTo: true)
+            .get();
+
+    return snapshot.docs.map((doc) {
+      final data = doc.data()! as Map<String, dynamic>;
+      return Recipe(
+        id: doc.id,
+        title: data['title'] ?? '',
+        description: data['description'] ?? '',
+        image: data['image'] ?? '',
+        favorites: true,
+      );
+    }).toList();
   }
 
   void _showAddRecipeDialog(BuildContext context) {
@@ -178,7 +275,7 @@ class _HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       builder:
-          (context) => AlertDialog(
+          (_) => AlertDialog(
             title: Text(context.l10n.addRecipe),
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -209,13 +306,34 @@ class _HomePageState extends State<HomePage> {
                 child: Text(context.l10n.cancel),
               ),
               TextButton(
-                onPressed: () {
+                onPressed: () async {
+                  final user = _auth.currentUser;
+                  if (user == null) return;
+
                   if (titleController.text.isNotEmpty) {
-                    context.read<RecipeProvider>().addRecipe(
-                      titleController.text,
-                      descriptionController.text,
-                      imageController.text,
-                    );
+                    final themeString =
+                        widget.currentTheme == ThemeMode.dark
+                            ? 'dark'
+                            : (widget.currentTheme == ThemeMode.light
+                                ? 'light'
+                                : 'system');
+
+                    final locale = Localizations.localeOf(context);
+                    final localeString =
+                        '${locale.languageCode}_${locale.countryCode ?? ''}';
+
+                    await _firestore
+                        .collection('users')
+                        .doc(user.uid)
+                        .collection('recipes')
+                        .add({
+                          'title': titleController.text,
+                          'description': descriptionController.text,
+                          'image': imageController.text,
+                          'favorites': false,
+                          'theme': themeString,
+                          'locale': localeString,
+                        });
                   }
                   Navigator.pop(context);
                 },
@@ -226,11 +344,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> _confirmDelete(Recipe recipe, BuildContext context) async {
+  Future<void> _confirmDelete(String recipeId) async {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder:
-          (context) => AlertDialog(
+          (_) => AlertDialog(
             title: Text(context.l10n.deleteRecipeTitle),
             content: Text(context.l10n.deleteRecipeConfirmation),
             actions: [
@@ -247,25 +365,49 @@ class _HomePageState extends State<HomePage> {
     );
 
     if (shouldDelete == true) {
-      context.read<RecipeProvider>().removeRecipe(recipe.id);
+      final user = _auth.currentUser;
+      if (user == null) return;
+
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('recipes')
+          .doc(recipeId)
+          .delete();
+
+      setState(() {
+        favoriteRecipeIds.remove(recipeId);
+      });
     }
   }
 
-  void _toggleFavorite(Recipe recipe, BuildContext context) {
+  void _toggleFavorite(String recipeId, String title) {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final isNowFavorite = !favoriteRecipeIds.contains(recipeId);
+
     setState(() {
-      if (favoriteRecipes.contains(recipe)) {
-        favoriteRecipes.remove(recipe);
+      if (isNowFavorite) {
+        favoriteRecipeIds.add(recipeId);
       } else {
-        favoriteRecipes.add(recipe);
+        favoriteRecipeIds.remove(recipeId);
       }
     });
+
+    _firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('recipes')
+        .doc(recipeId)
+        .update({'favorites': isNowFavorite});
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          favoriteRecipes.contains(recipe)
-              ? context.l10n.recipeAddedToFavorites(recipe.title)
-              : context.l10n.recipeRemovedFromFavorites(recipe.title),
+          isNowFavorite
+              ? context.l10n.recipeAddedToFavorites(title)
+              : context.l10n.recipeRemovedFromFavorites(title),
         ),
       ),
     );
@@ -291,54 +433,42 @@ class _HomePageState extends State<HomePage> {
               imageUrl,
               height: 180,
               fit: BoxFit.cover,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
+              loadingBuilder: (context, child, progress) {
+                if (progress == null) return child;
                 return SizedBox(
                   height: 180,
                   child: Center(
                     child: CircularProgressIndicator(
                       value:
-                          loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
+                          progress.expectedTotalBytes != null
+                              ? progress.cumulativeBytesLoaded /
+                                  progress.expectedTotalBytes!
                               : null,
                     ),
                   ),
                 );
               },
               errorBuilder:
-                  (context, error, stackTrace) => Container(
+                  (_, __, ___) => Container(
                     height: 180,
                     color: Colors.grey[300],
                     alignment: Alignment.center,
-                    child: const Icon(
-                      Icons.broken_image,
-                      size: 40,
-                      color: Colors.grey,
-                    ),
+                    child: const Icon(Icons.broken_image, size: 40),
                   ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 6),
+                Text(title, style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 8),
                 Text(
                   description,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontSize: 15),
-                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
             ),

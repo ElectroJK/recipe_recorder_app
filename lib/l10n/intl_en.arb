@@ -66,6 +66,26 @@
 "recipeAddedToFavorites": "{recipe} added to favorites",
 "recipeRemovedFromFavorites": "{recipe} removed from favorites",
 "favoritesPageTitle": "Favorites",
-"favoritesPageEmpty": "No favorites yet!"
-
+"favoritesPageEmpty": "No favorites yet!",
+"profilePageTitle": "Profile",
+"logout": "Logout",
+"errorLoadingRecipes": "Error loading recipes",
+    "login": "Login",
+  "register": "Register",
+  "email": "Email",
+  "password": "Password",
+  "confirmPassword": "Confirm Password",
+  "username": "Username",
+  "fillAllFields": "Please fill in all fields",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "registrationSuccess": "You have successfully registered",
+  "registrationFailed": "Registration failed",
+  "loginFailed": "Login failed",
+  "dontHaveAccountRegister": "Don't have an account? Register here",
+  "english": "English",
+  "russian": "Russian",
+  "kazakh": "Kazakh",
+  "profile": "Profile",
+"continueAsGuest": "Continue as Guest",
+"userNotLoggedIn": "User is not logged in"
 }

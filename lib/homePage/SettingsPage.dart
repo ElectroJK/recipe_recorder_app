@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:recipe_recorder_app/l10n/app_localizations_ext.dart';
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
+  final ThemeMode currentTheme;
+  final void Function(ThemeMode) onThemeChanged;
+  final void Function(Locale) onLocaleChanged;
+
+  const SettingsPage({
+    Key? key,
+    required this.currentTheme,
+    required this.onThemeChanged,
+    required this.onLocaleChanged,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final args =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-    final Function(ThemeMode) onThemeChanged = args['onThemeChanged'];
-    final Function(Locale) onLocaleChanged = args['onLocaleChanged'];
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final iconColor = isDark ? Colors.grey[300] : Colors.black;
 
@@ -21,22 +26,32 @@ class SettingsPage extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.language, color: iconColor),
             title: Text(context.l10n.language),
-            onTap: () => _showLanguageBottomSheet(context, onLocaleChanged),
+            onTap: () => _showLanguageBottomSheet(context),
           ),
           ListTile(
             leading: Icon(Icons.brightness_6, color: iconColor),
             title: Text(context.l10n.theme),
-            onTap: () => _showThemeBottomSheet(context, onThemeChanged),
+            subtitle: Text(_themeModeToString(context, currentTheme)),
+            onTap: () => _showThemeBottomSheet(context),
           ),
         ],
       ),
     );
   }
 
-  void _showLanguageBottomSheet(
-    BuildContext context,
-    Function(Locale) onLocaleChanged,
-  ) {
+  String _themeModeToString(BuildContext context, ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return context.l10n.light;
+      case ThemeMode.dark:
+        return context.l10n.dark;
+      case ThemeMode.system:
+      default:
+        return context.l10n.systemDefault;
+    }
+  }
+
+  void _showLanguageBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       builder:
@@ -69,10 +84,7 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  void _showThemeBottomSheet(
-    BuildContext context,
-    Function(ThemeMode) onThemeChanged,
-  ) {
+  void _showThemeBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       builder:

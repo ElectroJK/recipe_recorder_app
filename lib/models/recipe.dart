@@ -3,19 +3,29 @@ class Recipe {
   final String title;
   final String description;
   final String image;
+  final bool favorites;
 
   Recipe({
     required this.id,
     required this.title,
     required this.description,
     required this.image,
+    this.favorites = false,
   });
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Recipe && runtimeType == other.runtimeType && id == other.id;
-
-  @override
-  int get hashCode => id.hashCode;
+  Recipe copyWith({
+    String? id,
+    String? title,
+    String? description,
+    String? image,
+    bool? favorites,
+  }) {
+    return Recipe(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      image: image ?? this.image,
+      favorites: favorites ?? this.favorites,
+    );
+  }
 }
