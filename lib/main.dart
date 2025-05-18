@@ -3,7 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-
+import 'HomePage/GuestHomePage.dart';
 import 'package:recipe_recorder_app/userData/UserSettingProvider.dart';
 import 'models/recipe_controller.dart';
 import 'homePage/home_page.dart';
@@ -44,11 +44,16 @@ class MyApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: LoginPage(
-        currentTheme: userSettings.themeMode,
-        onThemeChanged: userSettings.setThemeMode,
-        onLocaleChanged: userSettings.setLocale,
-      ),
+      initialRoute: '/login_page',
+      routes: {
+        '/login_page':
+            (context) => LoginPage(
+              currentTheme: userSettings.themeMode,
+              onThemeChanged: userSettings.setThemeMode,
+              onLocaleChanged: userSettings.setLocale,
+            ),
+        '/guest_home': (context) => const GuestHomePage(),
+      },
     );
   }
 }

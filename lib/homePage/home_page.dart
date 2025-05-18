@@ -331,8 +331,6 @@ class _HomePageState extends State<HomePage> {
                           'description': descriptionController.text,
                           'image': imageController.text,
                           'favorites': false,
-                          'theme': themeString,
-                          'locale': localeString,
                         });
                   }
                   Navigator.pop(context);
@@ -453,7 +451,7 @@ class _HomePageState extends State<HomePage> {
                     height: 180,
                     color: Colors.grey[300],
                     alignment: Alignment.center,
-                    child: const Icon(Icons.broken_image, size: 40),
+                    child: const Icon(Icons.food_bank, size: 40),
                   ),
             ),
           ),
