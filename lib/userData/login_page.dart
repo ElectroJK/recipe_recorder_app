@@ -101,59 +101,70 @@ class _LoginPageState extends State<LoginPage> {
       data: ThemeData.light(),
       child: Scaffold(
         appBar: AppBar(title: const Text('Login')),
-        body: Padding(
+        resizeToAvoidBottomInset: true,
+        body: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Login',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 32),
-              TextField(
-                controller: emailController,
-                enabled: !isLoading,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: passwordController,
-                obscureText: obscureText,
-                enabled: !isLoading,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      obscureText ? Icons.visibility : Icons.visibility_off,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight:
+                  MediaQuery.of(context).size.height -
+                  AppBar().preferredSize.height -
+                  MediaQuery.of(context).padding.top,
+            ),
+            child: IntrinsicHeight(
+              child: Column(
+                children: [
+                  const Text(
+                    'Login',
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 32),
+                  TextField(
+                    controller: emailController,
+                    enabled: !isLoading,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(),
                     ),
-                    onPressed: () => setState(() => obscureText = !obscureText),
                   ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              isLoading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                    onPressed: _login,
-                    child: const Text('Login'),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: passwordController,
+                    obscureText: obscureText,
+                    enabled: !isLoading,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          obscureText ? Icons.visibility : Icons.visibility_off,
+                        ),
+                        onPressed:
+                            () => setState(() => obscureText = !obscureText),
+                      ),
+                    ),
                   ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: isLoading ? null : _goToRegister,
-                child: const Text("Don't have an account? Register"),
+                  const SizedBox(height: 24),
+                  isLoading
+                      ? const CircularProgressIndicator()
+                      : ElevatedButton(
+                        onPressed: _login,
+                        child: const Text('Login'),
+                      ),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: isLoading ? null : _goToRegister,
+                    child: const Text("Don't have an account? Register"),
+                  ),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: isLoading ? null : _loginAsGuest,
+                    icon: const Icon(Icons.person_outline),
+                    label: const Text('Continue as guest'),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                onPressed: isLoading ? null : _loginAsGuest,
-                icon: const Icon(Icons.person_outline),
-                label: const Text('Continue as guest'),
-              ),
-            ],
+            ),
           ),
         ),
       ),

@@ -92,13 +92,13 @@ class _RegisterPageState extends State<RegisterPage> {
             onPressed: () => Navigator.pop(context),
           ),
         ),
-        body: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
+        resizeToAvoidBottomInset: true,
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   const Text(
                     'Register',
