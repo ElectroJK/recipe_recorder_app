@@ -49,10 +49,29 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
+    final passwordRegex = RegExp(
+      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$',
+    );
+
+    if (!passwordRegex.hasMatch(password)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Password must be at least 8 characters and include:\n'
+            '- upper and lower case letters\n'
+            '- at least one number\n'
+            '- at least one special character',
+          ),
+        ),
+      );
+      return;
+    }
+
     setState(() => isLoading = true);
     try {
       final userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
+
       await userCredential.user?.updateDisplayName(username);
       await userCredential.user?.reload();
 
@@ -72,9 +91,24 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
       );
     } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration failed: ${e.message ?? e.code}')),
-      );
+      String errorMessage;
+      switch (e.code) {
+        case 'weak-password':
+          errorMessage = 'The password provided is too weak.';
+          break;
+        case 'email-already-in-use':
+          errorMessage = 'An account already exists for that email.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'The email address is not valid.';
+          break;
+        default:
+          errorMessage = 'Registration failed: ${e.message ?? e.code}';
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(errorMessage)));
     } finally {
       setState(() => isLoading = false);
     }
