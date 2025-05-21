@@ -1,6 +1,4 @@
-{
-  "@@locale": "kk",
-  "appTitle": "Рецепттер жазғышы",
+{  "@@locale": "kk",  "appTitle": "Рецепттер жазғышы",  "searchHint": "Рецепттерді іздеу...",  "searchButton": "Табу",  "noSearchResults": "Рецепттер табылмады",
   "settings": "Параметрлер",
   "theme": "Тақырып",
   "language": "Тіл",
@@ -95,5 +93,8 @@
   "logoutConfirmTitle": "Шығуды растаңыз",
   "logoutConfirmMessage": "Шығуға сенімдісіз бе?",
   "yes": "Иә",
-  "no": "Жоқ"
+  "no": "Жоқ",
+  "searchHint": "Рецепттерді іздеу...",
+  "searchButton": "Табу",
+  "noSearchResults": "Рецепттер табылмады"
 }

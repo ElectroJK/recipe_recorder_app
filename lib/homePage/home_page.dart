@@ -38,12 +38,20 @@ class _HomePageState extends State<HomePage> {
   Set<String> favoriteRecipeIds = {};
   int _selectedIndex = 0;
   final List<Widget> _pages = [];
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     _loadFavorites();
     _checkAuthState();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _checkAuthState() {
@@ -83,7 +91,7 @@ class _HomePageState extends State<HomePage> {
 
   void _onNavBarTap(int index) {
     setState(() => _selectedIndex = index);
-    
+
     if (index == 1) {
       _navigateToFavorites();
     } else if (index == 2) {
@@ -113,11 +121,12 @@ class _HomePageState extends State<HomePage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => SettingsPage(
-          currentTheme: widget.currentTheme,
-          onThemeChanged: widget.onThemeChanged,
-          onLocaleChanged: widget.onLocaleChanged,
-        ),
+        builder:
+            (_) => SettingsPage(
+              currentTheme: widget.currentTheme,
+              onThemeChanged: widget.onThemeChanged,
+              onLocaleChanged: widget.onLocaleChanged,
+            ),
       ),
     ).then((_) => setState(() => _selectedIndex = 0));
   }
@@ -127,6 +136,65 @@ class _HomePageState extends State<HomePage> {
       context,
       MaterialPageRoute(builder: (_) => const ProfilePage()),
     ).then((_) => setState(() => _selectedIndex = 0));
+  }
+
+  Widget _buildSearchBar() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final userSettings = context.read<UserSettingsProvider>();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: isDark ? Colors.grey[800] : Colors.grey[200],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+                  width: 1,
+                ),
+              ),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) => setState(() => _searchQuery = value),
+                style: TextStyle(color: isDark ? Colors.white : Colors.black),
+                decoration: InputDecoration(
+                  hintText: context.l10n.searchHint,
+                  hintStyle: TextStyle(
+                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton(
+            onPressed: () {
+              setState(() => _searchQuery = _searchController.text);
+              FocusScope.of(context).unfocus();
+            },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(context.l10n.searchButton),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -204,86 +272,131 @@ class _HomePageState extends State<HomePage> {
         body: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 700),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: StreamBuilder<QuerySnapshot>(
-                stream:
-                    _firestore
-                        .collection('users')
-                        .doc(user.uid)
-                        .collection('recipes')
-                        .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text(context.l10n.errorLoadingRecipes),
-                    );
-                  }
-                  if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  final docs = snapshot.data!.docs;
-                  final recipeCards =
-                      docs.map((doc) {
-                        final data = doc.data()! as Map<String, dynamic>;
-                        final recipeId = doc.id;
-                        final title = data['title'] ?? '';
-                        final description = data['description'] ?? '';
-                        final image = data['image'] ?? '';
-                        final isFavorite = data['favorites'] ?? false;
-
-                        if (isFavorite) {
-                          favoriteRecipeIds.add(recipeId);
-                        } else {
-                          favoriteRecipeIds.remove(recipeId);
+            child: Column(
+              children: [
+                _buildSearchBar(),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream:
+                          _firestore
+                              .collection('users')
+                              .doc(user.uid)
+                              .collection('recipes')
+                              .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return Center(
+                            child: Text(context.l10n.errorLoadingRecipes),
+                          );
+                        }
+                        if (!snapshot.hasData) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
                         }
 
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Slidable(
-                            key: ValueKey(recipeId),
-                            endActionPane: ActionPane(
-                              motion: const DrawerMotion(),
-                              children: [
-                                SlidableAction(
-                                  onPressed:
-                                      (_) => _toggleFavorite(recipeId, title),
-                                  backgroundColor: Colors.orange,
-                                  foregroundColor: Colors.white,
-                                  icon: Icons.star,
-                                  label: context.l10n.favoritesLabel,
-                                ),
-                                SlidableAction(
-                                  onPressed: (_) => _confirmDelete(recipeId),
-                                  backgroundColor: Colors.red,
-                                  foregroundColor: Colors.white,
-                                  icon: Icons.delete,
-                                  label: context.l10n.delete,
-                                ),
-                              ],
-                            ),
-                            child: Stack(
-                              children: [
-                                _recipeCard(context, title, description, image),
-                                if (isFavorite)
-                                  const Positioned(
-                                    top: 8,
-                                    right: 8,
-                                    child: Icon(
-                                      Icons.star,
-                                      color: Colors.orange,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }).toList();
+                        final docs = snapshot.data!.docs;
+                        final filteredDocs =
+                            _searchQuery.isEmpty
+                                ? docs
+                                : docs.where((doc) {
+                                  final data =
+                                      doc.data()! as Map<String, dynamic>;
+                                  final title =
+                                      (data['title'] as String? ?? '')
+                                          .toLowerCase();
+                                  final description =
+                                      (data['description'] as String? ?? '')
+                                          .toLowerCase();
+                                  final query = _searchQuery.toLowerCase();
+                                  return title.contains(query) ||
+                                      description.contains(query);
+                                }).toList();
 
-                  return ListView(children: recipeCards);
-                },
-              ),
+                        if (filteredDocs.isEmpty) {
+                          return Center(
+                            child: Text(
+                              _searchQuery.isEmpty
+                                  ? 'No recipes yet. Add some!'
+                                  : context.l10n.noSearchResults,
+                            ),
+                          );
+                        }
+
+                        final recipeCards =
+                            filteredDocs.map((doc) {
+                              final data = doc.data()! as Map<String, dynamic>;
+                              final recipeId = doc.id;
+                              final title = data['title'] ?? '';
+                              final description = data['description'] ?? '';
+                              final image = data['image'] ?? '';
+                              final isFavorite = data['favorites'] ?? false;
+
+                              if (isFavorite) {
+                                favoriteRecipeIds.add(recipeId);
+                              } else {
+                                favoriteRecipeIds.remove(recipeId);
+                              }
+
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: Slidable(
+                                  key: ValueKey(recipeId),
+                                  endActionPane: ActionPane(
+                                    motion: const DrawerMotion(),
+                                    children: [
+                                      SlidableAction(
+                                        onPressed:
+                                            (_) => _toggleFavorite(
+                                              recipeId,
+                                              title,
+                                            ),
+                                        backgroundColor: Colors.orange,
+                                        foregroundColor: Colors.white,
+                                        icon: Icons.star,
+                                        label: context.l10n.favoritesLabel,
+                                      ),
+                                      SlidableAction(
+                                        onPressed:
+                                            (_) => _confirmDelete(recipeId),
+                                        backgroundColor: Colors.red,
+                                        foregroundColor: Colors.white,
+                                        icon: Icons.delete,
+                                        label: context.l10n.delete,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      _recipeCard(
+                                        context,
+                                        title,
+                                        description,
+                                        image,
+                                      ),
+                                      if (isFavorite)
+                                        const Positioned(
+                                          top: 8,
+                                          right: 8,
+                                          child: Icon(
+                                            Icons.star,
+                                            color: Colors.orange,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }).toList();
+
+                        return ListView(children: recipeCards);
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -608,7 +721,10 @@ class _HomePageState extends State<HomePage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: controller.isOnline ? Colors.green.withOpacity(0.8) : Colors.grey.withOpacity(0.8),
+        color:
+            controller.isOnline
+                ? Colors.green.withOpacity(0.8)
+                : Colors.grey.withOpacity(0.8),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
