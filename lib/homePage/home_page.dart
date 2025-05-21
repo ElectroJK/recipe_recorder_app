@@ -346,46 +346,201 @@ class _HomePageState extends State<HomePage> {
                                   key: ValueKey(recipeId),
                                   endActionPane: ActionPane(
                                     motion: const DrawerMotion(),
+                                    extentRatio: 0.25,
+                                    dragDismissible: false,
                                     children: [
-                                      SlidableAction(
-                                        onPressed:
-                                            (_) => _toggleFavorite(
-                                              recipeId,
-                                              title,
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(left: 2),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context).cardColor,
+                                              borderRadius: const BorderRadius.horizontal(
+                                                right: Radius.circular(16),
+                                              ),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withOpacity(0.05),
+                                                  blurRadius: 4,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ],
                                             ),
-                                        backgroundColor: Colors.orange,
-                                        foregroundColor: Colors.white,
-                                        icon: Icons.star,
-                                        label: context.l10n.favoritesLabel,
-                                      ),
-                                      SlidableAction(
-                                        onPressed:
-                                            (_) => _confirmDelete(recipeId),
-                                        backgroundColor: Colors.red,
-                                        foregroundColor: Colors.white,
-                                        icon: Icons.delete,
-                                        label: context.l10n.delete,
+                                            child: Row(
+                                              children: [
+                                                Expanded(
+                                                  child: CustomSlidableAction(
+                                                    onPressed: (_) => _toggleFavorite(recipeId, title),
+                                                    backgroundColor: Colors.transparent,
+                                                    foregroundColor: const Color(0xFFFFB74D),
+                                                    autoClose: true,
+                                                    padding: EdgeInsets.zero,
+                                                    child: Container(
+                                                      margin: const EdgeInsets.all(2),
+                                                      decoration: BoxDecoration(
+                                                        color: Theme.of(context).brightness == Brightness.dark
+                                                            ? const Color(0xFF1A2C25)
+                                                            : Colors.white,
+                                                        borderRadius: const BorderRadius.only(
+                                                          topRight: Radius.circular(14),
+                                                          bottomRight: Radius.circular(14),
+                                                        ),
+                                                      ),
+                                                      child: const Icon(
+                                                        Icons.star_rounded,
+                                                        size: 26,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Container(
+                                                  width: 1,
+                                                  margin: const EdgeInsets.symmetric(vertical: 12),
+                                                  color: Theme.of(context).brightness == Brightness.dark
+                                                      ? Colors.white.withOpacity(0.05)
+                                                      : Colors.black.withOpacity(0.05),
+                                                ),
+                                                Expanded(
+                                                  child: CustomSlidableAction(
+                                                    onPressed: (_) => _confirmDelete(recipeId),
+                                                    backgroundColor: Colors.transparent,
+                                                    foregroundColor: const Color(0xFFEF5350),
+                                                    autoClose: true,
+                                                    padding: EdgeInsets.zero,
+                                                    child: Container(
+                                                      margin: const EdgeInsets.all(2),
+                                                      decoration: BoxDecoration(
+                                                        color: Theme.of(context).brightness == Brightness.dark
+                                                            ? const Color(0xFF1A2C25)
+                                                            : Colors.white,
+                                                        borderRadius: const BorderRadius.only(
+                                                          topRight: Radius.circular(14),
+                                                          bottomRight: Radius.circular(14),
+                                                        ),
+                                                      ),
+                                                      child: const Icon(
+                                                        Icons.delete_rounded,
+                                                        size: 26,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),
-                                  child: Stack(
-                                    children: [
-                                      _recipeCard(
-                                        context,
-                                        title,
-                                        description,
-                                        image,
-                                      ),
-                                      if (isFavorite)
-                                        const Positioned(
-                                          top: 8,
-                                          right: 8,
-                                          child: Icon(
-                                            Icons.star,
-                                            color: Colors.orange,
-                                          ),
+                                  child: GestureDetector(
+                                    onTap: () => _showRecipeDetails(data),
+                                    child: Card(
+                                      elevation: 4,
+                                      shadowColor: Theme.of(context).brightness == Brightness.dark
+                                          ? Colors.black.withOpacity(0.4)
+                                          : Colors.black.withOpacity(0.1),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        side: BorderSide(
+                                          color: Theme.of(context).brightness == Brightness.dark
+                                              ? Colors.white.withOpacity(0.05)
+                                              : Colors.black.withOpacity(0.05),
                                         ),
-                                    ],
+                                      ),
+                                      clipBehavior: Clip.antiAlias,
+                                      child: Stack(
+                                        children: [
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                                            children: [
+                                              if (image.isNotEmpty &&
+                                                  (image.startsWith('http://') || image.startsWith('https://')))
+                                                Image.network(
+                                                  image,
+                                                  height: 200,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (_, __, ___) => Container(
+                                                    height: 200,
+                                                    color: Theme.of(context).brightness == Brightness.dark
+                                                        ? const Color(0xFF1A2C25)
+                                                        : const Color(0xFFF2F7F4),
+                                                    child: Icon(
+                                                      Icons.broken_image_rounded,
+                                                      size: 40,
+                                                      color: Theme.of(context).brightness == Brightness.dark
+                                                          ? const Color(0xFF3D9F6F)
+                                                          : const Color(0xFF2C7A52),
+                                                    ),
+                                                  ),
+                                                )
+                                              else
+                                                Container(
+                                                  height: 200,
+                                                  color: Theme.of(context).brightness == Brightness.dark
+                                                      ? const Color(0xFF1A2C25)
+                                                      : const Color(0xFFF2F7F4),
+                                                  child: Icon(
+                                                    Icons.image_not_supported_rounded,
+                                                    size: 40,
+                                                    color: Theme.of(context).brightness == Brightness.dark
+                                                        ? const Color(0xFF3D9F6F)
+                                                        : const Color(0xFF2C7A52),
+                                                  ),
+                                                ),
+                                              Padding(
+                                                padding: const EdgeInsets.all(16),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      title,
+                                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                                        height: 1.3,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 8),
+                                                    Text(
+                                                      description,
+                                                      maxLines: 3,
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                                        height: 1.5,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          if (isFavorite)
+                                            Positioned(
+                                              top: 12,
+                                              right: 12,
+                                              child: Container(
+                                                padding: const EdgeInsets.all(6),
+                                                decoration: BoxDecoration(
+                                                  color: Theme.of(context).brightness == Brightness.dark
+                                                      ? Colors.black.withOpacity(0.5)
+                                                      : Colors.white.withOpacity(0.9),
+                                                  shape: BoxShape.circle,
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.black.withOpacity(0.2),
+                                                      blurRadius: 4,
+                                                      offset: const Offset(0, 2),
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: const Icon(
+                                                  Icons.star_rounded,
+                                                  color: Color(0xFFFFB74D),
+                                                  size: 20,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ),
                               );
@@ -467,107 +622,253 @@ class _HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       barrierDismissible: !isAdding,
-      builder:
-          (dialogContext) => StatefulBuilder(
-            builder:
-                (context, setState) => AlertDialog(
-                  title: Text(context.l10n.addRecipe),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
                     children: [
-                      TextField(
-                        controller: titleController,
-                        enabled: !isAdding,
-                        decoration: InputDecoration(
-                          labelText: context.l10n.titleLabel,
+                      Expanded(
+                        child: Text(
+                          context.l10n.addRecipe,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      TextField(
-                        controller: descriptionController,
-                        enabled: !isAdding,
-                        decoration: InputDecoration(
-                          labelText: context.l10n.descriptionLabel,
-                        ),
-                      ),
-                      TextField(
-                        controller: imageController,
-                        enabled: !isAdding,
-                        decoration: InputDecoration(
-                          labelText: context.l10n.imageLabel,
-                        ),
-                      ),
-                      if (isAdding)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 16.0),
-                          child: CircularProgressIndicator(),
+                      if (!isAdding)
+                        IconButton(
+                          icon: const Icon(Icons.close, size: 20),
+                          onPressed: () => Navigator.pop(context),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.5),
                         ),
                     ],
                   ),
-                  actions: [
-                    TextButton(
-                      onPressed: isAdding ? null : () => Navigator.pop(context),
-                      child: Text(context.l10n.cancel),
+                  const SizedBox(height: 20),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.7,
                     ),
-                    TextButton(
-                      onPressed:
-                          isAdding
-                              ? null
-                              : () async {
-                                final user = _auth.currentUser;
-                                if (user == null) return;
-
-                                if (titleController.text.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(context.l10n.titleRequired),
-                                    ),
-                                  );
-                                  return;
-                                }
-
-                                setState(() => isAdding = true);
-
-                                final recipeController =
-                                    Provider.of<RecipeController>(
-                                      context,
-                                      listen: false,
-                                    );
-
-                                final success = await recipeController
-                                    .addRecipe({
-                                      'title': titleController.text,
-                                      'description': descriptionController.text,
-                                      'image': imageController.text,
-                                      'favorites': false,
-                                    });
-
-                                if (success) {
-                                  Navigator.pop(context);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        recipeController.isOnline
-                                            ? context.l10n.recipeAddedOnline
-                                            : context.l10n.recipeAddedOffline,
-                                      ),
-                                    ),
-                                  );
-                                } else {
-                                  setState(() => isAdding = false);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        context.l10n.errorAddingRecipe,
-                                      ),
-                                    ),
-                                  );
-                                }
-                              },
-                      child: Text(context.l10n.add),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? const Color(0xFF1A2C25)
+                                  : const Color(0xFFF2F7F4),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white.withOpacity(0.1)
+                                    : Colors.black.withOpacity(0.05),
+                              ),
+                            ),
+                            child: TextField(
+                              controller: titleController,
+                              enabled: !isAdding,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                              decoration: InputDecoration(
+                                labelText: context.l10n.titleLabel,
+                                labelStyle: TextStyle(
+                                  color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.7),
+                                ),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: Icon(
+                                    Icons.restaurant_menu,
+                                    size: 20,
+                                    color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? const Color(0xFF1A2C25)
+                                  : const Color(0xFFF2F7F4),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white.withOpacity(0.1)
+                                    : Colors.black.withOpacity(0.05),
+                              ),
+                            ),
+                            child: TextField(
+                              controller: descriptionController,
+                              enabled: !isAdding,
+                              maxLines: 3,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                              decoration: InputDecoration(
+                                labelText: context.l10n.descriptionLabel,
+                                labelStyle: TextStyle(
+                                  color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.7),
+                                ),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: Icon(
+                                    Icons.description,
+                                    size: 20,
+                                    color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? const Color(0xFF1A2C25)
+                                  : const Color(0xFFF2F7F4),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white.withOpacity(0.1)
+                                    : Colors.black.withOpacity(0.05),
+                              ),
+                            ),
+                            child: TextField(
+                              controller: imageController,
+                              enabled: !isAdding,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                              decoration: InputDecoration(
+                                labelText: context.l10n.imageLabel,
+                                labelStyle: TextStyle(
+                                  color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.7),
+                                ),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: Icon(
+                                    Icons.image,
+                                    size: 20,
+                                    color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 24),
+                  if (isAdding)
+                    const Center(
+                      child: SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: CircularProgressIndicator(strokeWidth: 3),
+                      ),
+                    )
+                  else
+                    Wrap(
+                      alignment: WrapAlignment.end,
+                      spacing: 8,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            context.l10n.cancel,
+                            style: TextStyle(
+                              color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.7),
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () async {
+                            final user = _auth.currentUser;
+                            if (user == null) return;
+
+                            if (titleController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(context.l10n.titleRequired),
+                                ),
+                              );
+                              return;
+                            }
+
+                            setState(() => isAdding = true);
+
+                            final recipeController = Provider.of<RecipeController>(
+                              context,
+                              listen: false,
+                            );
+
+                            final success = await recipeController.addRecipe({
+                              'title': titleController.text,
+                              'description': descriptionController.text,
+                              'image': imageController.text,
+                              'favorites': false,
+                            });
+
+                            if (success) {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    recipeController.isOnline
+                                        ? context.l10n.recipeAddedOnline
+                                        : context.l10n.recipeAddedOffline,
+                                  ),
+                                ),
+                              );
+                            } else {
+                              setState(() => isAdding = false);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    context.l10n.errorAddingRecipe,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(context.l10n.add),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
           ),
+        ),
+      ),
     );
   }
 
@@ -640,79 +941,272 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _recipeCard(
-    BuildContext context,
-    String title,
-    String description,
-    String imageUrl,
-  ) {
-    final bool validImageUrl =
-        imageUrl.isNotEmpty &&
-        (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'));
-
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      clipBehavior: Clip.antiAlias,
-      color: Theme.of(context).cardColor.withOpacity(0.9),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            child:
-                validImageUrl
-                    ? Image.network(
-                      imageUrl,
-                      height: 180,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, progress) {
-                        if (progress == null) return child;
-                        return SizedBox(
-                          height: 180,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              value:
-                                  progress.expectedTotalBytes != null
-                                      ? progress.cumulativeBytesLoaded /
-                                          progress.expectedTotalBytes!
-                                      : null,
+  void _showRecipeDetails(Map<String, dynamic> recipe) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: 600,
+            maxHeight: MediaQuery.of(context).size.height * 0.9,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF0F1F1A)
+                : Colors.white,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          if (recipe['image'] != null && recipe['image'].isNotEmpty)
+                            Container(
+                              height: 300,
+                              decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(24),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(24),
+                                ),
+                                child: Image.network(
+                                  recipe['image'],
+                                  width: double.infinity,
+                                  height: 300,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    height: 300,
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).brightness == Brightness.dark
+                                          ? const Color(0xFF1A2C25)
+                                          : const Color(0xFFF2F7F4),
+                                      borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(24),
+                                      ),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.restaurant_menu,
+                                          size: 64,
+                                          color: Theme.of(context).brightness == Brightness.dark
+                                              ? const Color(0xFF3D9F6F)
+                                              : const Color(0xFF2C7A52),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          'No Image Available',
+                                          style: TextStyle(
+                                            color: Theme.of(context).brightness == Brightness.dark
+                                                ? const Color(0xFF3D9F6F)
+                                                : const Color(0xFF2C7A52),
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )
+                          else
+                            Container(
+                              height: 200,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? const Color(0xFF1A2C25)
+                                    : const Color(0xFFF2F7F4),
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(24),
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.restaurant_menu,
+                                    size: 64,
+                                    color: Theme.of(context).brightness == Brightness.dark
+                                        ? const Color(0xFF3D9F6F)
+                                        : const Color(0xFF2C7A52),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'No Image Available',
+                                    style: TextStyle(
+                                      color: Theme.of(context).brightness == Brightness.dark
+                                          ? const Color(0xFF3D9F6F)
+                                          : const Color(0xFF2C7A52),
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          Positioned(
+                            top: 16,
+                            right: 16,
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () => Navigator.pop(context),
+                                borderRadius: BorderRadius.circular(32),
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.5),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.2),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                        );
-                      },
-                      errorBuilder:
-                          (_, __, ___) => Container(
-                            height: 180,
-                            color: Colors.grey[300],
-                            alignment: Alignment.center,
-                            child: const Icon(Icons.broken_image, size: 40),
-                          ),
-                    )
-                    : Container(
-                      height: 180,
-                      color: Colors.grey[300],
-                      alignment: Alignment.center,
-                      child: const Icon(Icons.image_not_supported, size: 40),
-                    ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 8),
-                Text(
-                  description,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodyMedium,
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(32, 32, 32, 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    recipe['title'] ?? '',
+                                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).brightness == Brightness.dark
+                                          ? Colors.white
+                                          : const Color(0xFF2C7A52),
+                                      height: 1.2,
+                                    ),
+                                  ),
+                                ),
+                                if (recipe['favorites'] == true)
+                                  Container(
+                                    margin: const EdgeInsets.only(left: 16),
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).brightness == Brightness.dark
+                                          ? const Color(0xFF1A2C25)
+                                          : const Color(0xFFF2F7F4),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: Theme.of(context).brightness == Brightness.dark
+                                            ? Colors.white.withOpacity(0.1)
+                                            : Colors.black.withOpacity(0.05),
+                                      ),
+                                    ),
+                                    child: const Icon(
+                                      Icons.star_rounded,
+                                      color: Color(0xFFFFB74D),
+                                      size: 28,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 32),
+                            Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? const Color(0xFF1A2C25)
+                                    : const Color(0xFFF2F7F4),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Theme.of(context).brightness == Brightness.dark
+                                      ? Colors.white.withOpacity(0.1)
+                                      : Colors.black.withOpacity(0.05),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.description_outlined,
+                                        size: 24,
+                                        color: Theme.of(context).brightness == Brightness.dark
+                                            ? const Color(0xFF3D9F6F)
+                                            : const Color(0xFF2C7A52),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        context.l10n.descriptionLabel,
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context).brightness == Brightness.dark
+                                              ? const Color(0xFF3D9F6F)
+                                              : const Color(0xFF2C7A52),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    recipe['description'] ?? '',
+                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      height: 1.8,
+                                      fontSize: 16,
+                                      color: Theme.of(context).brightness == Brightness.dark
+                                          ? Colors.white.withOpacity(0.9)
+                                          : Colors.black.withOpacity(0.8),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

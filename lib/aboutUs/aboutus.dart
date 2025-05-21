@@ -24,7 +24,9 @@ class AboutPage extends StatelessWidget {
           l10n.aboutUsTitle,
           style: TextStyle(
             color: Theme.of(context).textTheme.bodyLarge?.color,
-            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
           ),
         ),
       ),
@@ -39,17 +41,20 @@ class AboutPage extends StatelessWidget {
                 AboutCard(
                   title: l10n.aboutRecipeRecorderTitle,
                   content: l10n.aboutRecipeRecorderContent,
+                  icon: Icons.restaurant_menu_rounded,
                 ),
                 const SizedBox(height: 20),
                 AboutCard(
                   title: l10n.developersTitle,
                   content: l10n.developersContent,
+                  icon: Icons.people_rounded,
                 ),
                 const SizedBox(height: 20),
                 AboutCard(
                   title: l10n.courseDetailsTitle,
                   content: l10n.courseDetailsContent,
                   isItalic: true,
+                  icon: Icons.school_rounded,
                 ),
               ],
             ),
@@ -64,46 +69,96 @@ class AboutCard extends StatelessWidget {
   final String title;
   final String content;
   final bool isItalic;
+  final IconData icon;
 
   const AboutCard({
     super.key,
     required this.title,
     required this.content,
     this.isItalic = false,
+    required this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).cardColor.withOpacity(0.92),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color:
-                    Theme.of(context).brightness == Brightness.dark
-                        ? const Color(0xFF81C784)
-                        : const Color(0xFF388E3C),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: isDark 
+                ? Colors.black.withOpacity(0.3)
+                : Colors.black.withOpacity(0.08),
+            offset: const Offset(0, 4),
+            blurRadius: 12,
+          ),
+        ],
+      ),
+      child: Card(
+        color: Theme.of(context).cardColor.withOpacity(0.95),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: isDark
+                ? const Color(0xFF3D9F6F).withOpacity(0.1)
+                : const Color(0xFF2C7A52).withOpacity(0.08),
+            width: 1,
+          ),
+        ),
+        elevation: 0,
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF3D9F6F).withOpacity(0.1)
+                          : const Color(0xFF2C7A52).withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      icon,
+                      size: 24,
+                      color: isDark
+                          ? const Color(0xFF4DAF7C)
+                          : const Color(0xFF2C7A52),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.3,
+                        color: isDark
+                            ? const Color(0xFF4DAF7C)
+                            : const Color(0xFF2C7A52),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              content,
-              style: TextStyle(
-                fontSize: 16,
-                color: Theme.of(context).textTheme.bodyMedium?.color,
-                fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
+              const SizedBox(height: 16),
+              Text(
+                content,
+                style: TextStyle(
+                  fontSize: 16,
+                  height: 1.5,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                  fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
