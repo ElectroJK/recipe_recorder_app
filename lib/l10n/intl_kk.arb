@@ -87,5 +87,13 @@
   "kazakh": "Қазақ",
   "profile": "Профиль",
   "continueAsGuest": "Қонақ ретінде кіру",
-  "userNotLoggedIn": "Пайдаланушы жүйеге кірмеген"
+  "userNotLoggedIn": "Пайдаланушы жүйеге кірмеген",
+  "titleRequired": "Атауы міндетті",
+  "recipeAddedOnline": "Рецепт сәтті қосылды",
+  "recipeAddedOffline": "Рецепт қосылды (офлайн режимі)",
+  "errorAddingRecipe": "Рецептті қосу кезінде қате шықты. Қайталап көріңіз.",
+  "logoutConfirmTitle": "Шығуды растаңыз",
+  "logoutConfirmMessage": "Шығуға сенімдісіз бе?",
+  "yes": "Иә",
+  "no": "Жоқ"
 }

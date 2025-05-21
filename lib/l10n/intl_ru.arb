@@ -87,5 +87,13 @@
   "kazakh": "Казахский",
   "profile": "Профиль",
   "continueAsGuest": "Продолжить как гость",
-  "userNotLoggedIn": "Пользователь не вошёл в систему"
+  "userNotLoggedIn": "Пользователь не вошёл в систему",
+  "titleRequired": "Название обязательно",
+  "recipeAddedOnline": "Рецепт успешно добавлен",
+  "recipeAddedOffline": "Рецепт добавлен (офлайн режим)",
+  "errorAddingRecipe": "Ошибка при добавлении рецепта. Пожалуйста, попробуйте снова.",
+  "logoutConfirmTitle": "Подтвердите выход",
+  "logoutConfirmMessage": "Вы уверены, что хотите выйти?",
+  "yes": "Да",
+  "no": "Нет"
 }

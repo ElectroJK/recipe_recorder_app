@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recipe_recorder_app/homePage/home_page.dart';
 import 'package:recipe_recorder_app/userData/register_page.dart';
 import 'package:recipe_recorder_app/homePage/GuestHomePage.dart';
+import 'package:recipe_recorder_app/services/storage_service.dart';
 
 class LoginPage extends StatefulWidget {
   final ThemeMode currentTheme;
@@ -23,8 +24,38 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final StorageService _storage = StorageService();
   bool obscureText = true;
   bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkExistingSession();
+  }
+
+  Future<void> _checkExistingSession() async {
+    final user = FirebaseAuth.instance.currentUser;
+    final credentials = await _storage.getUserCredentials();
+
+    if (user != null) {
+ 
+      if (user.isAnonymous) {
+        await FirebaseAuth.instance.signOut();
+        await _storage.clearUserCredentials();
+        return;
+      }
+      
+ 
+      if (!user.isAnonymous && credentials != null && credentials['email'] != null) {
+        _navigateToHome();
+      } else {
+
+        await FirebaseAuth.instance.signOut();
+        await _storage.clearUserCredentials();
+      }
+    }
+  }
 
   Future<void> _login() async {
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
@@ -36,10 +67,18 @@ class _LoginPageState extends State<LoginPage> {
 
     setState(() => isLoading = true);
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text,
       );
+      
+      if (userCredential.user != null) {
+        await _storage.saveUserCredentials(
+          emailController.text.trim(),
+          userCredential.user!.uid,
+        );
+      }
+      
       _navigateToHome();
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -67,15 +106,23 @@ class _LoginPageState extends State<LoginPage> {
   void _loginAsGuest() async {
     setState(() => isLoading = true);
     try {
-      await FirebaseAuth.instance.signInAnonymously();
+      // Clear any existing auth state and storage
+      if (FirebaseAuth.instance.currentUser != null) {
+        await FirebaseAuth.instance.signOut();
+      }
+      await _storage.clearUserCredentials();
+      
+      if (!mounted) return;
+      
+      // Navigate to guest page without Firebase authentication
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const GuestHomePage()),
       );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Guest login failed: $e')));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Guest login failed: $e')));
     } finally {
       setState(() => isLoading = false);
     }

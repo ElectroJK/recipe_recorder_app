@@ -11,6 +11,8 @@ import 'package:recipe_recorder_app/design/theme.dart';
 import 'package:recipe_recorder_app/models/recipe.dart';
 import 'package:recipe_recorder_app/userData/UserSettingProvider.dart';
 import 'package:provider/provider.dart';
+import 'package:recipe_recorder_app/models/recipe_controller.dart';
+import 'package:recipe_recorder_app/userData/login_page.dart';
 
 class HomePage extends StatefulWidget {
   final void Function(ThemeMode) onThemeChanged;
@@ -35,11 +37,31 @@ class _HomePageState extends State<HomePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   Set<String> favoriteRecipeIds = {};
   int _selectedIndex = 0;
+  final List<Widget> _pages = [];
 
   @override
   void initState() {
     super.initState();
     _loadFavorites();
+    _checkAuthState();
+  }
+
+  void _checkAuthState() {
+    _auth.authStateChanges().listen((User? user) {
+      if (user == null && mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder:
+                (context) => LoginPage(
+                  currentTheme: widget.currentTheme,
+                  onThemeChanged: widget.onThemeChanged,
+                  onLocaleChanged: widget.onLocaleChanged,
+                ),
+          ),
+          (route) => false,
+        );
+      }
+    });
   }
 
   Future<void> _loadFavorites() async {
@@ -59,12 +81,61 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _onNavBarTap(int index) {
+    setState(() => _selectedIndex = index);
+    
+    if (index == 1) {
+      _navigateToFavorites();
+    } else if (index == 2) {
+      _navigateToSettings();
+    } else if (index == 3) {
+      _navigateToProfile();
+    }
+  }
+
+  Future<void> _navigateToFavorites() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final favorites = await _fetchFavoriteRecipes(user.uid);
+    if (!mounted) return;
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => FavoritesPage(favoriteRecipes: favorites),
+      ),
+    );
+    setState(() => _selectedIndex = 0);
+  }
+
+  void _navigateToSettings() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SettingsPage(
+          currentTheme: widget.currentTheme,
+          onThemeChanged: widget.onThemeChanged,
+          onLocaleChanged: widget.onLocaleChanged,
+        ),
+      ),
+    ).then((_) => setState(() => _selectedIndex = 0));
+  }
+
+  void _navigateToProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const ProfilePage()),
+    ).then((_) => setState(() => _selectedIndex = 0));
+  }
+
   @override
   Widget build(BuildContext context) {
     final userSettings = context.read<UserSettingsProvider>();
     final isDarkMode = userSettings.themeMode == ThemeMode.dark;
     final gradient = isDarkMode ? getDarkGradient() : getLightGradient();
     final user = _auth.currentUser;
+    final recipeController = Provider.of<RecipeController>(context);
 
     if (user == null) {
       return Scaffold(body: Center(child: Text(context.l10n.userNotLoggedIn)));
@@ -76,11 +147,46 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text(context.l10n.appTitle),
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  context.l10n.appTitle,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              _buildConnectionIndicator(recipeController),
+            ],
+          ),
           backgroundColor: Colors.transparent,
           elevation: 0,
           iconTheme: IconThemeData(color: Theme.of(context).iconTheme.color),
           actions: [
+            if (!recipeController.isSyncing)
+              IconButton(
+                icon: const Icon(Icons.sync),
+                onPressed:
+                    recipeController.isOnline
+                        ? () => recipeController.syncData()
+                        : null,
+                tooltip:
+                    recipeController.isOnline
+                        ? 'Sync data'
+                        : 'Offline - Cannot sync',
+              ),
+            if (recipeController.isSyncing)
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Center(
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+              ),
             IconButton(
               icon: const Icon(Icons.info_outline),
               onPressed: () {
@@ -192,6 +298,8 @@ class _HomePageState extends State<HomePage> {
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           currentIndex: _selectedIndex,
+          selectedItemColor: Theme.of(context).colorScheme.primary,
+          unselectedItemColor: Colors.grey,
           items: [
             BottomNavigationBarItem(
               icon: const Icon(Icons.home),
@@ -210,37 +318,7 @@ class _HomePageState extends State<HomePage> {
               label: context.l10n.profilePageTitle,
             ),
           ],
-          onTap: (index) async {
-            if (_selectedIndex == index) return;
-            setState(() => _selectedIndex = index);
-
-            if (index == 1) {
-              final favorites = await _fetchFavoriteRecipes(user.uid);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => FavoritesPage(favoriteRecipes: favorites),
-                ),
-              );
-            } else if (index == 2) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder:
-                      (_) => SettingsPage(
-                        currentTheme: userSettings.themeMode,
-                        onThemeChanged: widget.onThemeChanged,
-                        onLocaleChanged: widget.onLocaleChanged,
-                      ),
-                ),
-              );
-            } else if (index == 3) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ProfilePage()),
-              );
-            }
-          },
+          onTap: _onNavBarTap,
         ),
       ),
     );
@@ -271,73 +349,111 @@ class _HomePageState extends State<HomePage> {
     final titleController = TextEditingController();
     final descriptionController = TextEditingController();
     final imageController = TextEditingController();
+    bool isAdding = false;
 
     showDialog(
       context: context,
+      barrierDismissible: !isAdding,
       builder:
-          (_) => AlertDialog(
-            title: Text(context.l10n.addRecipe),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: titleController,
-                  decoration: InputDecoration(
-                    labelText: context.l10n.titleLabel,
+          (dialogContext) => StatefulBuilder(
+            builder:
+                (context, setState) => AlertDialog(
+                  title: Text(context.l10n.addRecipe),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: titleController,
+                        enabled: !isAdding,
+                        decoration: InputDecoration(
+                          labelText: context.l10n.titleLabel,
+                        ),
+                      ),
+                      TextField(
+                        controller: descriptionController,
+                        enabled: !isAdding,
+                        decoration: InputDecoration(
+                          labelText: context.l10n.descriptionLabel,
+                        ),
+                      ),
+                      TextField(
+                        controller: imageController,
+                        enabled: !isAdding,
+                        decoration: InputDecoration(
+                          labelText: context.l10n.imageLabel,
+                        ),
+                      ),
+                      if (isAdding)
+                        const Padding(
+                          padding: EdgeInsets.only(top: 16.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                    ],
                   ),
-                ),
-                TextField(
-                  controller: descriptionController,
-                  decoration: InputDecoration(
-                    labelText: context.l10n.descriptionLabel,
-                  ),
-                ),
-                TextField(
-                  controller: imageController,
-                  decoration: InputDecoration(
-                    labelText: context.l10n.imageLabel,
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(context.l10n.cancel),
-              ),
-              TextButton(
-                onPressed: () async {
-                  final user = _auth.currentUser;
-                  if (user == null) return;
+                  actions: [
+                    TextButton(
+                      onPressed: isAdding ? null : () => Navigator.pop(context),
+                      child: Text(context.l10n.cancel),
+                    ),
+                    TextButton(
+                      onPressed:
+                          isAdding
+                              ? null
+                              : () async {
+                                final user = _auth.currentUser;
+                                if (user == null) return;
 
-                  if (titleController.text.isNotEmpty) {
-                    final themeString =
-                        widget.currentTheme == ThemeMode.dark
-                            ? 'dark'
-                            : (widget.currentTheme == ThemeMode.light
-                                ? 'light'
-                                : 'system');
+                                if (titleController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(context.l10n.titleRequired),
+                                    ),
+                                  );
+                                  return;
+                                }
 
-                    final locale = Localizations.localeOf(context);
-                    final localeString =
-                        '${locale.languageCode}_${locale.countryCode ?? ''}';
+                                setState(() => isAdding = true);
 
-                    await _firestore
-                        .collection('users')
-                        .doc(user.uid)
-                        .collection('recipes')
-                        .add({
-                          'title': titleController.text,
-                          'description': descriptionController.text,
-                          'image': imageController.text,
-                          'favorites': false,
-                        });
-                  }
-                  Navigator.pop(context);
-                },
-                child: Text(context.l10n.add),
-              ),
-            ],
+                                final recipeController =
+                                    Provider.of<RecipeController>(
+                                      context,
+                                      listen: false,
+                                    );
+
+                                final success = await recipeController
+                                    .addRecipe({
+                                      'title': titleController.text,
+                                      'description': descriptionController.text,
+                                      'image': imageController.text,
+                                      'favorites': false,
+                                    });
+
+                                if (success) {
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        recipeController.isOnline
+                                            ? context.l10n.recipeAddedOnline
+                                            : context.l10n.recipeAddedOffline,
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  setState(() => isAdding = false);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        context.l10n.errorAddingRecipe,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                      child: Text(context.l10n.add),
+                    ),
+                  ],
+                ),
           ),
     );
   }
@@ -417,6 +533,10 @@ class _HomePageState extends State<HomePage> {
     String description,
     String imageUrl,
   ) {
+    final bool validImageUrl =
+        imageUrl.isNotEmpty &&
+        (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'));
+
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -427,33 +547,41 @@ class _HomePageState extends State<HomePage> {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            child: Image.network(
-              imageUrl,
-              height: 180,
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, progress) {
-                if (progress == null) return child;
-                return SizedBox(
-                  height: 180,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      value:
-                          progress.expectedTotalBytes != null
-                              ? progress.cumulativeBytesLoaded /
-                                  progress.expectedTotalBytes!
-                              : null,
+            child:
+                validImageUrl
+                    ? Image.network(
+                      imageUrl,
+                      height: 180,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, progress) {
+                        if (progress == null) return child;
+                        return SizedBox(
+                          height: 180,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              value:
+                                  progress.expectedTotalBytes != null
+                                      ? progress.cumulativeBytesLoaded /
+                                          progress.expectedTotalBytes!
+                                      : null,
+                            ),
+                          ),
+                        );
+                      },
+                      errorBuilder:
+                          (_, __, ___) => Container(
+                            height: 180,
+                            color: Colors.grey[300],
+                            alignment: Alignment.center,
+                            child: const Icon(Icons.broken_image, size: 40),
+                          ),
+                    )
+                    : Container(
+                      height: 180,
+                      color: Colors.grey[300],
+                      alignment: Alignment.center,
+                      child: const Icon(Icons.image_not_supported, size: 40),
                     ),
-                  ),
-                );
-              },
-              errorBuilder:
-                  (_, __, ___) => Container(
-                    height: 180,
-                    color: Colors.grey[300],
-                    alignment: Alignment.center,
-                    child: const Icon(Icons.food_bank, size: 40),
-                  ),
-            ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -469,6 +597,35 @@ class _HomePageState extends State<HomePage> {
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConnectionIndicator(RecipeController controller) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: controller.isOnline ? Colors.green.withOpacity(0.8) : Colors.grey.withOpacity(0.8),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            controller.isOnline ? Icons.cloud_done : Icons.cloud_off,
+            size: 14,
+            color: Colors.white,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            controller.isOnline ? 'Online' : 'Offline',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],

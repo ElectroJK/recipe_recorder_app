@@ -87,5 +87,13 @@
   "kazakh": "Kazakh",
   "profile": "Profile",
 "continueAsGuest": "Continue as Guest",
-"userNotLoggedIn": "User is not logged in"
+"userNotLoggedIn": "User is not logged in",
+"titleRequired": "Title is required",
+"recipeAddedOnline": "Recipe added successfully",
+"recipeAddedOffline": "Recipe added (offline mode)",
+"errorAddingRecipe": "Error adding recipe. Please try again.",
+"logoutConfirmTitle": "Confirm Logout",
+"logoutConfirmMessage": "Are you sure you want to log out?",
+"yes": "Yes",
+"no": "No"
 }
