@@ -1,4 +1,4 @@
-{  "@@locale": "kk",  "appTitle": "Рецепттер жазғышы",  "searchHint": "Рецепттерді іздеу...",  "searchButton": "Табу",  "noSearchResults": "Рецепттер табылмады",
+{  "@@locale": "kk",  "appTitle": "Рецепттер жазғышы",  "searchHint": "Рецепттерді іздеу...",  "searchButton": "Табу",  "noSearchResults": "Бұл атаумен рецепттер табылмады",
   "settings": "Параметрлер",
   "theme": "Тақырып",
   "language": "Тіл",
@@ -96,5 +96,10 @@
   "no": "Жоқ",
   "searchHint": "Рецепттерді іздеу...",
   "searchButton": "Табу",
-  "noSearchResults": "Рецепттер табылмады"
+  "noRecipesFound": "Рецепттер табылмады. Жаңасын қосыңыз!",
+  "editRecipe": "Рецептті өңдеу",
+  "editRecipeTitle": "Рецептті өңдеу",
+  "saveChanges": "Өзгерістерді сақтау",
+  "recipeUpdated": "Рецепт сәтті жаңартылды",
+  "recipeUpdateFailed": "Рецептті жаңарту сәтсіз аяқталды"
 }

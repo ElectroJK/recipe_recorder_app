@@ -95,5 +95,12 @@
   "logoutConfirmTitle": "Подтвердите выход",
   "logoutConfirmMessage": "Вы уверены, что хотите выйти?",
   "yes": "Да",
-  "no": "Нет"
+  "no": "Нет",
+  "noRecipesFound": "Рецепты не найдены. Добавьте новые!",
+  "noSearchResults": "Рецепты с таким названием не найдены",
+  "editRecipe": "Редактировать рецепт",
+  "editRecipeTitle": "Редактирование рецепта",
+  "saveChanges": "Сохранить изменения",
+  "recipeUpdated": "Рецепт успешно обновлен",
+  "recipeUpdateFailed": "Не удалось обновить рецепт"
 }

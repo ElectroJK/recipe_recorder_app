@@ -3,7 +3,7 @@
   "appTitle": "Recipe Recorder",
   "searchHint": "Search recipes...",
   "searchButton": "Find",
-  "noSearchResults": "No recipes found",
+  "noSearchResults": "No recipes found with this name",
   "settings": "Settings",
   "theme": "Theme",
   "language": "Language",
@@ -101,5 +101,10 @@
   "no": "No",
   "searchHint": "Search recipes...",
   "searchButton": "Find",
-  "noSearchResults": "No recipes found"
+  "noRecipesFound": "No recipes found. Add some!",
+  "editRecipe": "Edit Recipe",
+  "editRecipeTitle": "Edit Recipe",
+  "saveChanges": "Save Changes",
+  "recipeUpdated": "Recipe updated successfully",
+  "recipeUpdateFailed": "Failed to update recipe"
 }

@@ -31,6 +31,31 @@ class _ProfilePageState extends State<ProfilePage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  String _getThemeText(BuildContext context, ThemeMode themeMode) {
+    switch (themeMode) {
+      case ThemeMode.light:
+        return context.l10n.light;
+      case ThemeMode.dark:
+        return context.l10n.dark;
+      case ThemeMode.system:
+      default:
+        return context.l10n.systemDefault;
+    }
+  }
+
+  String _getLanguageText(BuildContext context, Locale locale) {
+    switch (locale.languageCode) {
+      case 'en':
+        return context.l10n.english;
+      case 'ru':
+        return context.l10n.russian;
+      case 'kk':
+        return context.l10n.kazakh;
+      default:
+        return context.l10n.english;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -139,6 +164,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final userSettings = Provider.of<UserSettingsProvider>(context);
 
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.profilePageTitle)),
@@ -196,6 +222,16 @@ class _ProfilePageState extends State<ProfilePage> {
               ListTile(
                 leading: const Icon(Icons.email),
                 title: Text(user.email ?? 'No email'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.brightness_6),
+                title: Text(context.l10n.theme),
+                subtitle: Text(_getThemeText(context, userSettings.themeMode)),
+              ),
+              ListTile(
+                leading: const Icon(Icons.language),
+                title: Text(context.l10n.language),
+                subtitle: Text(_getLanguageText(context, userSettings.locale)),
               ),
               const Divider(),
             ],

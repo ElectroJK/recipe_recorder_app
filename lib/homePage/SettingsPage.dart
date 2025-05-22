@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:recipe_recorder_app/l10n/app_localizations_ext.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   final ThemeMode currentTheme;
   final void Function(ThemeMode) onThemeChanged;
   final void Function(Locale) onLocaleChanged;
@@ -12,6 +12,29 @@ class SettingsPage extends StatelessWidget {
     required this.onThemeChanged,
     required this.onLocaleChanged,
   }) : super(key: key);
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  late ThemeMode _currentTheme;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentTheme = widget.currentTheme;
+  }
+
+  @override
+  void didUpdateWidget(SettingsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentTheme != widget.currentTheme) {
+      setState(() {
+        _currentTheme = widget.currentTheme;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +54,7 @@ class SettingsPage extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.brightness_6, color: iconColor),
             title: Text(context.l10n.theme),
-            subtitle: Text(_themeModeToString(context, currentTheme)),
+            subtitle: Text(_themeModeToString(context, _currentTheme)),
             onTap: () => _showThemeBottomSheet(context),
           ),
         ],
@@ -61,21 +84,21 @@ class SettingsPage extends StatelessWidget {
               ListTile(
                 title: Text(context.l10n.english),
                 onTap: () {
-                  onLocaleChanged(const Locale('en'));
+                  widget.onLocaleChanged(const Locale('en'));
                   Navigator.pop(context);
                 },
               ),
               ListTile(
                 title: Text(context.l10n.russian),
                 onTap: () {
-                  onLocaleChanged(const Locale('ru'));
+                  widget.onLocaleChanged(const Locale('ru'));
                   Navigator.pop(context);
                 },
               ),
               ListTile(
                 title: Text(context.l10n.kazakh),
                 onTap: () {
-                  onLocaleChanged(const Locale('kk'));
+                  widget.onLocaleChanged(const Locale('kk'));
                   Navigator.pop(context);
                 },
               ),
@@ -94,21 +117,24 @@ class SettingsPage extends StatelessWidget {
               ListTile(
                 title: Text(context.l10n.light),
                 onTap: () {
-                  onThemeChanged(ThemeMode.light);
+                  setState(() => _currentTheme = ThemeMode.light);
+                  widget.onThemeChanged(ThemeMode.light);
                   Navigator.pop(context);
                 },
               ),
               ListTile(
                 title: Text(context.l10n.dark),
                 onTap: () {
-                  onThemeChanged(ThemeMode.dark);
+                  setState(() => _currentTheme = ThemeMode.dark);
+                  widget.onThemeChanged(ThemeMode.dark);
                   Navigator.pop(context);
                 },
               ),
               ListTile(
                 title: Text(context.l10n.systemDefault),
                 onTap: () {
-                  onThemeChanged(ThemeMode.system);
+                  setState(() => _currentTheme = ThemeMode.system);
+                  widget.onThemeChanged(ThemeMode.system);
                   Navigator.pop(context);
                 },
               ),

@@ -319,8 +319,14 @@ class _HomePageState extends State<HomePage> {
                           return Center(
                             child: Text(
                               _searchQuery.isEmpty
-                                  ? 'No recipes yet. Add some!'
-                                  : context.l10n.noSearchResults,
+                                ? context.l10n.noRecipesFound
+                                : context.l10n.noSearchResults,
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white70
+                                    : Colors.black54,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
                           );
                         }
@@ -402,6 +408,38 @@ class _HomePageState extends State<HomePage> {
                                                 ),
                                                 Expanded(
                                                   child: CustomSlidableAction(
+                                                    onPressed: (_) => _showEditDialog(recipeId, data),
+                                                    backgroundColor: Colors.transparent,
+                                                    foregroundColor: const Color(0xFF4CAF50),
+                                                    autoClose: true,
+                                                    padding: EdgeInsets.zero,
+                                                    child: Container(
+                                                      margin: const EdgeInsets.all(2),
+                                                      decoration: BoxDecoration(
+                                                        color: Theme.of(context).brightness == Brightness.dark
+                                                            ? const Color(0xFF1A2C25)
+                                                            : Colors.white,
+                                                        borderRadius: const BorderRadius.only(
+                                                          topRight: Radius.circular(14),
+                                                          bottomRight: Radius.circular(14),
+                                                        ),
+                                                      ),
+                                                      child: const Icon(
+                                                        Icons.edit_rounded,
+                                                        size: 26,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Container(
+                                                  width: 1,
+                                                  margin: const EdgeInsets.symmetric(vertical: 12),
+                                                  color: Theme.of(context).brightness == Brightness.dark
+                                                      ? Colors.white.withOpacity(0.05)
+                                                      : Colors.black.withOpacity(0.05),
+                                                ),
+                                                Expanded(
+                                                  child: CustomSlidableAction(
                                                     onPressed: (_) => _confirmDelete(recipeId),
                                                     backgroundColor: Colors.transparent,
                                                     foregroundColor: const Color(0xFFEF5350),
@@ -453,12 +491,28 @@ class _HomePageState extends State<HomePage> {
                                           Column(
                                             crossAxisAlignment: CrossAxisAlignment.stretch,
                                             children: [
-                                              if (image.isNotEmpty &&
-                                                  (image.startsWith('http://') || image.startsWith('https://')))
+                                              if (image.isNotEmpty)
                                                 Image.network(
-                                                  image,
+                                                  image.trim(),
                                                   height: 200,
                                                   fit: BoxFit.cover,
+                                                  loadingBuilder: (context, child, loadingProgress) {
+                                                    if (loadingProgress == null) return child;
+                                                    return Container(
+                                                      height: 200,
+                                                      color: Theme.of(context).brightness == Brightness.dark
+                                                          ? const Color(0xFF1A2C25)
+                                                          : const Color(0xFFF2F7F4),
+                                                      child: Center(
+                                                        child: CircularProgressIndicator(
+                                                          value: loadingProgress.expectedTotalBytes != null
+                                                              ? loadingProgress.cumulativeBytesLoaded /
+                                                                  loadingProgress.expectedTotalBytes!
+                                                              : null,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
                                                   errorBuilder: (_, __, ___) => Container(
                                                     height: 200,
                                                     color: Theme.of(context).brightness == Brightness.dark
@@ -1205,6 +1259,262 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showEditDialog(String recipeId, Map<String, dynamic> recipeData) {
+    final titleController = TextEditingController(text: recipeData['title'] ?? '');
+    final descriptionController = TextEditingController(text: recipeData['description'] ?? '');
+    final imageController = TextEditingController(text: recipeData['image'] ?? '');
+    bool isUpdating = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: !isUpdating,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          context.l10n.editRecipeTitle,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      if (!isUpdating)
+                        IconButton(
+                          icon: const Icon(Icons.close, size: 20),
+                          onPressed: () => Navigator.pop(context),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.7,
+                    ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? const Color(0xFF1A2C25)
+                                  : const Color(0xFFF2F7F4),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white.withOpacity(0.1)
+                                    : Colors.black.withOpacity(0.05),
+                              ),
+                            ),
+                            child: TextField(
+                              controller: titleController,
+                              enabled: !isUpdating,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                              decoration: InputDecoration(
+                                labelText: context.l10n.titleLabel,
+                                labelStyle: TextStyle(
+                                  color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.7),
+                                ),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: Icon(
+                                    Icons.restaurant_menu,
+                                    size: 20,
+                                    color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? const Color(0xFF1A2C25)
+                                  : const Color(0xFFF2F7F4),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white.withOpacity(0.1)
+                                    : Colors.black.withOpacity(0.05),
+                              ),
+                            ),
+                            child: TextField(
+                              controller: descriptionController,
+                              enabled: !isUpdating,
+                              maxLines: 3,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                              decoration: InputDecoration(
+                                labelText: context.l10n.descriptionLabel,
+                                labelStyle: TextStyle(
+                                  color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.7),
+                                ),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: Icon(
+                                    Icons.description,
+                                    size: 20,
+                                    color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? const Color(0xFF1A2C25)
+                                  : const Color(0xFFF2F7F4),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white.withOpacity(0.1)
+                                    : Colors.black.withOpacity(0.05),
+                              ),
+                            ),
+                            child: TextField(
+                              controller: imageController,
+                              enabled: !isUpdating,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                              decoration: InputDecoration(
+                                labelText: context.l10n.imageLabel,
+                                labelStyle: TextStyle(
+                                  color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.7),
+                                ),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: Icon(
+                                    Icons.image,
+                                    size: 20,
+                                    color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  if (isUpdating)
+                    const Center(
+                      child: SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: CircularProgressIndicator(strokeWidth: 3),
+                      ),
+                    )
+                  else
+                    Wrap(
+                      alignment: WrapAlignment.end,
+                      spacing: 8,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            context.l10n.cancel,
+                            style: TextStyle(
+                              color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.7),
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () async {
+                            final user = _auth.currentUser;
+                            if (user == null) return;
+
+                            if (titleController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(context.l10n.titleRequired),
+                                ),
+                              );
+                              return;
+                            }
+
+                            setState(() => isUpdating = true);
+
+                            try {
+                              await _firestore
+                                  .collection('users')
+                                  .doc(user.uid)
+                                  .collection('recipes')
+                                  .doc(recipeId)
+                                  .update({
+                                'title': titleController.text,
+                                'description': descriptionController.text,
+                                'image': imageController.text.trim(),
+                              });
+
+                              if (mounted) {
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(context.l10n.recipeUpdated),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              setState(() => isUpdating = false);
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(context.l10n.recipeUpdateFailed),
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(context.l10n.saveChanges),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
