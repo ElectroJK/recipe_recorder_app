@@ -15,10 +15,10 @@ import 'design/theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  
+
   final storageService = StorageService();
   await storageService.init();
-  
+
   runApp(
     MultiProvider(
       providers: [

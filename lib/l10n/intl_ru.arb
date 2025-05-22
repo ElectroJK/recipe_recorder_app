@@ -102,5 +102,7 @@
   "editRecipeTitle": "Редактирование рецепта",
   "saveChanges": "Сохранить изменения",
   "recipeUpdated": "Рецепт успешно обновлен",
-  "recipeUpdateFailed": "Не удалось обновить рецепт"
+  "recipeUpdateFailed": "Не удалось обновить рецепт",
+  "searchHint": "Поиск рецептов...",
+  "searchButton": "Найти"
 }
