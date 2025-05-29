@@ -82,15 +82,16 @@ class AboutCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: isDark 
-                ? Colors.black.withOpacity(0.3)
-                : Colors.black.withOpacity(0.08),
+            color:
+                isDark
+                    ? Colors.black.withOpacity(0.3)
+                    : Colors.black.withOpacity(0.08),
             offset: const Offset(0, 4),
             blurRadius: 12,
           ),
@@ -101,9 +102,10 @@ class AboutCard extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(
-            color: isDark
-                ? const Color(0xFF3D9F6F).withOpacity(0.1)
-                : const Color(0xFF2C7A52).withOpacity(0.08),
+            color:
+                isDark
+                    ? const Color(0xFF3D9F6F).withOpacity(0.1)
+                    : const Color(0xFF2C7A52).withOpacity(0.08),
             width: 1,
           ),
         ),
@@ -118,17 +120,19 @@ class AboutCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFF3D9F6F).withOpacity(0.1)
-                          : const Color(0xFF2C7A52).withOpacity(0.08),
+                      color:
+                          isDark
+                              ? const Color(0xFF3D9F6F).withOpacity(0.1)
+                              : const Color(0xFF2C7A52).withOpacity(0.08),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
                       icon,
                       size: 24,
-                      color: isDark
-                          ? const Color(0xFF4DAF7C)
-                          : const Color(0xFF2C7A52),
+                      color:
+                          isDark
+                              ? const Color(0xFF4DAF7C)
+                              : const Color(0xFF2C7A52),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -139,9 +143,10 @@ class AboutCard extends StatelessWidget {
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.3,
-                        color: isDark
-                            ? const Color(0xFF4DAF7C)
-                            : const Color(0xFF2C7A52),
+                        color:
+                            isDark
+                                ? const Color(0xFF4DAF7C)
+                                : const Color(0xFF2C7A52),
                       ),
                     ),
                   ),

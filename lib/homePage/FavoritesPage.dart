@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:recipe_recorder_app/models/recipe.dart';
 import 'package:recipe_recorder_app/l10n/app_localizations_ext.dart';

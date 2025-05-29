@@ -14,16 +14,11 @@ import 'design/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Add error handling for Firebase initialization
+
   try {
-    await Firebase.initializeApp(
-      // You can add custom options here if needed
-      // options: DefaultFirebaseOptions.currentPlatform,
-    );
+    await Firebase.initializeApp();
   } catch (e) {
     print('Error initializing Firebase: $e');
-    // Handle the error appropriately
   }
 
   final storageService = StorageService();
