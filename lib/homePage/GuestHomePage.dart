@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:recipe_recorder_app/userData/login_page.dart';
 import 'package:recipe_recorder_app/services/storage_service.dart';
+import 'package:recipe_recorder_app/homePage/GuestRecipeCatalogPage.dart';
+import 'package:recipe_recorder_app/l10n/app_localizations_ext.dart';
 
 class GuestHomePage extends StatefulWidget {
   const GuestHomePage({Key? key}) : super(key: key);
@@ -18,26 +20,46 @@ class _GuestHomePageState extends State<GuestHomePage> {
   void _onNavBarTap(int index) async {
     if (index == 0) {
       setState(() => _selectedIndex = 0);
-    } else if (index == 1 || index == 2) {
+    } else if (index == 1) {
+      _navigateToRecipeCatalog();
+    } else if (index == 2 || index == 3) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please log in to access this feature')),
-      );
-    } else if (index == 3) {
-      await _storage.clearUserCredentials();
-      
-      if (!mounted) return;
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => LoginPage(
-            currentTheme: ThemeMode.system,
-            onThemeChanged: (_) {},
-            onLocaleChanged: (_) {},
+        SnackBar(
+          content: Text(context.l10n.userNotLoggedIn),
+          action: SnackBarAction(
+            label: context.l10n.login,
+            onPressed: () => _navigateToLogin(),
           ),
         ),
       );
+    } else if (index == 4) {
+      _navigateToLogin();
     }
+  }
+
+  void _navigateToRecipeCatalog() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const GuestRecipeCatalogPage()),
+    ).then((_) => setState(() => _selectedIndex = 0));
+  }
+
+  void _navigateToLogin() async {
+    await _storage.clearUserCredentials();
+
+    if (!mounted) return;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => LoginPage(
+              currentTheme: ThemeMode.system,
+              onThemeChanged: (_) {},
+              onLocaleChanged: (_) {},
+            ),
+      ),
+    );
   }
 
   void _showAddRecipeDialog() {
@@ -47,48 +69,49 @@ class _GuestHomePageState extends State<GuestHomePage> {
 
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Add Recipe'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
+      builder:
+          (_) => AlertDialog(
+            title: const Text('Add Recipe'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: titleController,
+                    decoration: const InputDecoration(labelText: 'Title'),
+                  ),
+                  TextField(
+                    controller: descriptionController,
+                    decoration: const InputDecoration(labelText: 'Description'),
+                  ),
+                  TextField(
+                    controller: imageController,
+                    decoration: const InputDecoration(labelText: 'Image URL'),
+                  ),
+                ],
               ),
-              TextField(
-                controller: descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
               ),
-              TextField(
-                controller: imageController,
-                decoration: const InputDecoration(labelText: 'Image URL'),
+              TextButton(
+                onPressed: () {
+                  if (titleController.text.isEmpty) return;
+                  setState(() {
+                    _recipes.insert(0, {
+                      'title': titleController.text,
+                      'description': descriptionController.text,
+                      'image': imageController.text,
+                    });
+                  });
+                  Navigator.pop(context);
+                },
+                child: const Text('Add'),
               ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              if (titleController.text.isEmpty) return;
-              setState(() {
-                _recipes.insert(0, {
-                  'title': titleController.text,
-                  'description': descriptionController.text,
-                  'image': imageController.text,
-                });
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('Add'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -97,43 +120,44 @@ class _GuestHomePageState extends State<GuestHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Guest Mode'),
-        automaticallyImplyLeading: false, 
+        automaticallyImplyLeading: false,
       ),
-      body: _recipes.isEmpty
-          ? const Center(child: Text('No recipes yet. Add some!'))
-          : ListView.builder(
-              padding: const EdgeInsets.all(8),
-              itemCount: _recipes.length,
-              itemBuilder: (context, index) {
-                final recipe = _recipes[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Slidable(
-                    key: ValueKey(recipe['title']! + index.toString()),
-                    endActionPane: ActionPane(
-                      motion: const DrawerMotion(),
-                      children: [
-                        SlidableAction(
-                          onPressed: (_) {
-                            setState(() => _recipes.removeAt(index));
-                          },
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
-                          icon: Icons.delete,
-                          label: 'Delete',
-                        ),
-                      ],
+      body:
+          _recipes.isEmpty
+              ? const Center(child: Text('No recipes yet. Add some!'))
+              : ListView.builder(
+                padding: const EdgeInsets.all(8),
+                itemCount: _recipes.length,
+                itemBuilder: (context, index) {
+                  final recipe = _recipes[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Slidable(
+                      key: ValueKey(recipe['title']! + index.toString()),
+                      endActionPane: ActionPane(
+                        motion: const DrawerMotion(),
+                        children: [
+                          SlidableAction(
+                            onPressed: (_) {
+                              setState(() => _recipes.removeAt(index));
+                            },
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            icon: Icons.delete,
+                            label: 'Delete',
+                          ),
+                        ],
+                      ),
+                      child: _recipeCard(
+                        context,
+                        recipe['title'] ?? '',
+                        recipe['description'] ?? '',
+                        recipe['image'] ?? '',
+                      ),
                     ),
-                    child: _recipeCard(
-                      context,
-                      recipe['title'] ?? '',
-                      recipe['description'] ?? '',
-                      recipe['image'] ?? '',
-                    ),
-                  ),
-                );
-              },
-            ),
+                  );
+                },
+              ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.grey[300],
         onPressed: _showAddRecipeDialog,
@@ -143,14 +167,27 @@ class _GuestHomePageState extends State<GuestHomePage> {
         currentIndex: _selectedIndex,
         onTap: _onNavBarTap,
         type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: const Icon(Icons.home),
+            label: context.l10n.bottomNavHome,
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.exit_to_app), label: 'Exit'),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.menu_book),
+            label: context.l10n.bottomNavCatalog,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.person),
+            label: context.l10n.profilePageTitle,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.settings),
+            label: context.l10n.bottomNavSettings,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.exit_to_app),
+            label: 'Exit',
+          ),
         ],
       ),
     );
@@ -172,38 +209,41 @@ class _GuestHomePageState extends State<GuestHomePage> {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            child: imageUrl.isNotEmpty
-                ? Image.network(
-                    imageUrl,
-                    height: 180,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, progress) {
-                      if (progress == null) return child;
-                      return SizedBox(
-                        height: 180,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            value: progress.expectedTotalBytes != null
-                                ? progress.cumulativeBytesLoaded /
-                                    progress.expectedTotalBytes!
-                                : null,
+            child:
+                imageUrl.isNotEmpty
+                    ? Image.network(
+                      imageUrl,
+                      height: 180,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, progress) {
+                        if (progress == null) return child;
+                        return SizedBox(
+                          height: 180,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              value:
+                                  progress.expectedTotalBytes != null
+                                      ? progress.cumulativeBytesLoaded /
+                                          progress.expectedTotalBytes!
+                                      : null,
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                    errorBuilder: (_, __, ___) => Container(
+                        );
+                      },
+                      errorBuilder:
+                          (_, __, ___) => Container(
+                            height: 180,
+                            color: Colors.grey[300],
+                            alignment: Alignment.center,
+                            child: const Icon(Icons.broken_image, size: 40),
+                          ),
+                    )
+                    : Container(
                       height: 180,
                       color: Colors.grey[300],
                       alignment: Alignment.center,
-                      child: const Icon(Icons.broken_image, size: 40),
+                      child: const Icon(Icons.food_bank, size: 40),
                     ),
-                  )
-                : Container(
-                    height: 180,
-                    color: Colors.grey[300],
-                    alignment: Alignment.center,
-                    child: const Icon(Icons.food_bank, size: 40),
-                  ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),

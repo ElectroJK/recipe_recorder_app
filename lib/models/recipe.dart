@@ -4,6 +4,9 @@ class Recipe {
   final String description;
   final String image;
   final bool favorites;
+  final String ingredients;
+  final String category;
+  final String area;
 
   Recipe({
     required this.id,
@@ -11,6 +14,9 @@ class Recipe {
     required this.description,
     required this.image,
     this.favorites = false,
+    this.ingredients = '',
+    this.category = '',
+    this.area = '',
   });
 
   Recipe copyWith({
@@ -19,6 +25,9 @@ class Recipe {
     String? description,
     String? image,
     bool? favorites,
+    String? ingredients,
+    String? category,
+    String? area,
   }) {
     return Recipe(
       id: id ?? this.id,
@@ -26,6 +35,9 @@ class Recipe {
       description: description ?? this.description,
       image: image ?? this.image,
       favorites: favorites ?? this.favorites,
+      ingredients: ingredients ?? this.ingredients,
+      category: category ?? this.category,
+      area: area ?? this.area,
     );
   }
 }

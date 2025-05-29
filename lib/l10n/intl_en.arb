@@ -106,5 +106,18 @@
   "editRecipeTitle": "Edit Recipe",
   "saveChanges": "Save Changes",
   "recipeUpdated": "Recipe updated successfully",
-  "recipeUpdateFailed": "Failed to update recipe"
+  "recipeUpdateFailed": "Failed to update recipe",
+  "recipeCatalogTitle": "Recipe Catalog",
+  "bottomNavCatalog": "Catalog",
+  "addToMyRecipes": "Add to My Recipes",
+  "ingredientsLabel": "Ingredients",
+  "areaLabel": "Area (Optional)",
+  "categoryLabel": "Category",
+  "ingredientsHint": "Enter each ingredient on a new line",
+  "categoryHint": "e.g., Dessert, Main Course, Appetizer",
+  "areaHint": "e.g., Italian, Mexican, Chinese",
+  "viewRecipeDetails": "View Details",
+  "duplicateRecipeError": "Recipe with this title already exists",
+  "duplicateRecipeFromCatalog": "You already have this recipe in your collection",
+  "catalogOfflineError": "You cannot access the recipe catalog while offline. Please check your internet connection."
 }

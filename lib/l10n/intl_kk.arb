@@ -101,5 +101,18 @@
   "editRecipeTitle": "Рецептті өңдеу",
   "saveChanges": "Өзгерістерді сақтау",
   "recipeUpdated": "Рецепт сәтті жаңартылды",
-  "recipeUpdateFailed": "Рецептті жаңарту сәтсіз аяқталды"
+  "recipeUpdateFailed": "Рецептті жаңарту сәтсіз аяқталды",
+  "recipeCatalogTitle": "Рецепттер каталогы",
+  "bottomNavCatalog": "Каталог",
+  "addToMyRecipes": "Менің рецепттеріме қосу",
+  "ingredientsLabel": "Ингредиенттер",
+  "areaLabel": "Аймақ (Міндетті емес)",
+  "categoryLabel": "Санат",
+  "ingredientsHint": "Әр ингредиентті жаңа жолдан енгізіңіз",
+  "categoryHint": "мысалы, Десерт, Негізгі тағам, Тіскебасар",
+  "areaHint": "мысалы, Итальян, Мексика, Қытай",
+  "viewRecipeDetails": "Толығырақ",
+  "duplicateRecipeError": "Мұндай атаумен рецепт бұрыннан бар",
+  "duplicateRecipeFromCatalog": "Бұл рецепт сіздің жинағыңызда бұрыннан бар",
+  "catalogOfflineError": "Интернет байланысы жоқ кезде каталогқа кіре алмайсыз. Интернет байланысын тексеріңіз."
 }

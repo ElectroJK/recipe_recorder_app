@@ -129,6 +129,16 @@ class RecipeController extends ChangeNotifier {
 
   Future<bool> addRecipe(Map<String, dynamic> recipe) async {
     try {
+      // Check for duplicates
+      final existingRecipe = _recipes.firstWhere(
+        (r) => r['title'].toLowerCase() == recipe['title'].toLowerCase(),
+        orElse: () => {},
+      );
+
+      if (existingRecipe.isNotEmpty) {
+        return false;
+      }
+
       String? recipeId;
       
       if (_isOnline) {

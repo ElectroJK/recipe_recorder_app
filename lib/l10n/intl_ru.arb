@@ -104,5 +104,18 @@
   "recipeUpdated": "Рецепт успешно обновлен",
   "recipeUpdateFailed": "Не удалось обновить рецепт",
   "searchHint": "Поиск рецептов...",
-  "searchButton": "Найти"
+  "searchButton": "Найти",
+  "recipeCatalogTitle": "Каталог рецептов",
+  "bottomNavCatalog": "Каталог",
+  "addToMyRecipes": "Добавить в мои рецепты",
+  "ingredientsLabel": "Ингредиенты",
+  "areaLabel": "Кухня (Необязательно)",
+  "categoryLabel": "Категория",
+  "ingredientsHint": "Введите каждый ингредиент с новой строки",
+  "categoryHint": "например, Десерт, Основное блюдо, Закуска",
+  "areaHint": "например, Итальянская, Мексиканская, Китайская",
+  "viewRecipeDetails": "Подробнее",
+  "duplicateRecipeError": "Рецепт с таким названием уже существует",
+  "duplicateRecipeFromCatalog": "Этот рецепт уже есть в вашей коллекции",
+  "catalogOfflineError": "Вы не можете получить доступ к каталогу рецептов в автономном режиме. Пожалуйста, проверьте подключение к интернету."
 }
