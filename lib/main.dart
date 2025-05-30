@@ -44,6 +44,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       title: 'Recipe Recorder',
+      debugShowCheckedModeBanner: false,
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: userSettings.themeMode,
